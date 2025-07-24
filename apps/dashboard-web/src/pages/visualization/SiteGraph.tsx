@@ -1,0 +1,736 @@
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Container,
+  Paper,
+  Title,
+  Text,
+  Group,
+  Select,
+  RangeSlider,
+  Button,
+  Stack,
+  Tooltip,
+  Badge,
+  Card,
+  Tabs,
+  ActionIcon,
+  Box,
+  Divider,
+  Checkbox,
+  ColorSwatch,
+  useMantineTheme,
+} from '@mantine/core';
+import {
+  IconZoomIn,
+  IconZoomOut,
+  IconArrowsMaximize,
+  IconFilter,
+  IconInfoCircle,
+  IconLink,
+  IconFileText,
+  IconPhoto,
+  IconBrandJavascript,
+  IconBrandCss3,
+  IconLayoutGrid,
+  IconLayoutList,
+} from 'tabler-icons-react';
+import * as d3 from 'd3';
+
+// Type definitions for our graph data
+interface Node {
+  id: string;
+  url: string;
+  type: 'html' | 'css' | 'js' | 'image' | 'other';
+  title: string;
+  status: 'ok' | 'error' | 'warning' | 'redirect';
+  depth: number;
+  size: number;
+}
+
+interface Link {
+  source: string;
+  target: string;
+  type: 'internal' | 'external' | 'resource';
+  value: number;
+}
+
+interface GraphData {
+  nodes: Node[];
+  links: Link[];
+}
+
+// Mock data for the site structure
+const mockSiteData: GraphData = {
+  nodes: [
+    { id: 'home', url: '/', type: 'html', title: 'Home Page', status: 'ok', depth: 0, size: 100 },
+    { id: 'about', url: '/about', type: 'html', title: 'About Us', status: 'ok', depth: 1, size: 80 },
+    { id: 'products', url: '/products', type: 'html', title: 'Products', status: 'ok', depth: 1, size: 90 },
+    { id: 'contact', url: '/contact', type: 'html', title: 'Contact Us', status: 'ok', depth: 1, size: 70 },
+    { id: 'blog', url: '/blog', type: 'html', title: 'Blog', status: 'ok', depth: 1, size: 85 },
+    { id: 'blog-post-1', url: '/blog/post-1', type: 'html', title: 'Blog Post 1', status: 'ok', depth: 2, size: 60 },
+    { id: 'blog-post-2', url: '/blog/post-2', type: 'html', title: 'Blog Post 2', status: 'ok', depth: 2, size: 60 },
+    { id: 'blog-post-3', url: '/blog/post-3', type: 'html', title: 'Blog Post 3', status: 'warning', depth: 2, size: 60 },
+    { id: 'product-1', url: '/products/1', type: 'html', title: 'Product 1', status: 'ok', depth: 2, size: 65 },
+    { id: 'product-2', url: '/products/2', type: 'html', title: 'Product 2', status: 'ok', depth: 2, size: 65 },
+    { id: 'product-3', url: '/products/3', type: 'html', title: 'Product 3', status: 'redirect', depth: 2, size: 65 },
+    { id: 'team', url: '/about/team', type: 'html', title: 'Our Team', status: 'ok', depth: 2, size: 70 },
+    { id: 'careers', url: '/about/careers', type: 'html', title: 'Careers', status: 'error', depth: 2, size: 70 },
+    { id: 'main-css', url: '/assets/css/main.css', type: 'css', title: 'Main CSS', status: 'ok', depth: 1, size: 50 },
+    { id: 'app-js', url: '/assets/js/app.js', type: 'js', title: 'App JS', status: 'ok', depth: 1, size: 55 },
+    { id: 'hero-image', url: '/assets/images/hero.jpg', type: 'image', title: 'Hero Image', status: 'ok', depth: 1, size: 45 },
+    { id: 'logo', url: '/assets/images/logo.png', type: 'image', title: 'Logo', status: 'ok', depth: 1, size: 40 },
+    { id: 'external-cdn', url: 'https://cdn.example.com/library.js', type: 'js', title: 'External Library', status: 'ok', depth: 1, size: 50 },
+    { id: 'not-found', url: '/not-found', type: 'html', title: '404 Page', status: 'error', depth: 1, size: 60 },
+  ],
+  links: [
+    { source: 'home', target: 'about', type: 'internal', value: 1 },
+    { source: 'home', target: 'products', type: 'internal', value: 1 },
+    { source: 'home', target: 'contact', type: 'internal', value: 1 },
+    { source: 'home', target: 'blog', type: 'internal', value: 1 },
+    { source: 'home', target: 'main-css', type: 'resource', value: 1 },
+    { source: 'home', target: 'app-js', type: 'resource', value: 1 },
+    { source: 'home', target: 'hero-image', type: 'resource', value: 1 },
+    { source: 'home', target: 'logo', type: 'resource', value: 1 },
+    { source: 'home', target: 'external-cdn', type: 'external', value: 1 },
+    { source: 'about', target: 'team', type: 'internal', value: 1 },
+    { source: 'about', target: 'careers', type: 'internal', value: 1 },
+    { source: 'about', target: 'main-css', type: 'resource', value: 1 },
+    { source: 'about', target: 'app-js', type: 'resource', value: 1 },
+    { source: 'about', target: 'logo', type: 'resource', value: 1 },
+    { source: 'products', target: 'product-1', type: 'internal', value: 1 },
+    { source: 'products', target: 'product-2', type: 'internal', value: 1 },
+    { source: 'products', target: 'product-3', type: 'internal', value: 1 },
+    { source: 'products', target: 'main-css', type: 'resource', value: 1 },
+    { source: 'products', target: 'app-js', type: 'resource', value: 1 },
+    { source: 'blog', target: 'blog-post-1', type: 'internal', value: 1 },
+    { source: 'blog', target: 'blog-post-2', type: 'internal', value: 1 },
+    { source: 'blog', target: 'blog-post-3', type: 'internal', value: 1 },
+    { source: 'blog', target: 'main-css', type: 'resource', value: 1 },
+    { source: 'blog', target: 'app-js', type: 'resource', value: 1 },
+    { source: 'contact', target: 'main-css', type: 'resource', value: 1 },
+    { source: 'contact', target: 'app-js', type: 'resource', value: 1 },
+    { source: 'contact', target: 'logo', type: 'resource', value: 1 },
+    { source: 'home', target: 'not-found', type: 'internal', value: 1 },
+  ],
+};
+
+const SiteGraph: React.FC = () => {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const theme = useMantineTheme();
+  const [graphData, setGraphData] = useState<GraphData>(mockSiteData);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [viewMode, setViewMode] = useState<string>('graph');
+  const [depthFilter, setDepthFilter] = useState<[number, number]>([0, 3]);
+  const [typeFilters, setTypeFilters] = useState({
+    html: true,
+    css: true,
+    js: true,
+    image: true,
+    other: true,
+  });
+  const [statusFilters, setStatusFilters] = useState({
+    ok: true,
+    error: true,
+    warning: true,
+    redirect: true,
+  });
+
+  // Color mapping for node types
+  const colorMap = {
+    html: theme.colors.blue[6],
+    css: theme.colors.grape[6],
+    js: theme.colors.yellow[6],
+    image: theme.colors.green[6],
+    other: theme.colors.gray[6],
+  };
+
+  // Status color mapping
+  const statusColorMap = {
+    ok: theme.colors.green[6],
+    error: theme.colors.red[6],
+    warning: theme.colors.orange[6],
+    redirect: theme.colors.blue[6],
+  };
+
+  // Apply filters to data
+  const filteredData = React.useMemo(() => {
+    const filteredNodes = mockSiteData.nodes.filter(
+      (node) =>
+        node.depth >= depthFilter[0] &&
+        node.depth <= depthFilter[1] &&
+        typeFilters[node.type] &&
+        statusFilters[node.status]
+    );
+
+    const nodeIds = new Set(filteredNodes.map((node) => node.id));
+
+    const filteredLinks = mockSiteData.links.filter(
+      (link) => nodeIds.has(link.source as string) && nodeIds.has(link.target as string)
+    );
+
+    return { nodes: filteredNodes, links: filteredLinks };
+  }, [depthFilter, typeFilters, statusFilters]);
+
+  // Initialize and update the D3 visualization
+  useEffect(() => {
+    if (!svgRef.current || !wrapperRef.current) return;
+
+    const width = wrapperRef.current.clientWidth;
+    const height = 600;
+
+    // Clear any existing SVG content
+    d3.select(svgRef.current).selectAll('*').remove();
+
+    const svg = d3
+      .select(svgRef.current)
+      .attr('width', width)
+      .attr('height', height)
+      .attr('viewBox', [0, 0, width, height])
+      .attr('style', 'max-width: 100%; height: auto;');
+
+    // Create a group for zoom/pan
+    const g = svg.append('g');
+
+    // Add zoom behavior
+    const zoom = d3
+      .zoom<SVGSVGElement, unknown>()
+      .scaleExtent([0.1, 4])
+      .on('zoom', (event) => {
+        g.attr('transform', event.transform);
+      });
+
+    svg.call(zoom);
+
+    // Center the view initially
+    svg.call(zoom.transform, d3.zoomIdentity.translate(width / 2, height / 2).scale(0.8));
+
+    // Create the force simulation
+    const simulation = d3
+      .forceSimulation()
+      .nodes(filteredData.nodes as d3.SimulationNodeDatum[])
+      .force(
+        'link',
+        d3
+          .forceLink(filteredData.links)
+          .id((d: any) => d.id)
+          .distance(100)
+      )
+      .force('charge', d3.forceManyBody().strength(-300))
+      .force('center', d3.forceCenter(width / 2, height / 2))
+      .force('x', d3.forceX(width / 2).strength(0.1))
+      .force('y', d3.forceY(height / 2).strength(0.1));
+
+    // Create links
+    const link = g
+      .append('g')
+      .attr('stroke', '#999')
+      .attr('stroke-opacity', 0.6)
+      .selectAll('line')
+      .data(filteredData.links)
+      .join('line')
+      .attr('stroke-width', (d) => Math.sqrt(d.value) * 2)
+      .attr('stroke', (d) => {
+        switch (d.type) {
+          case 'internal':
+            return theme.colors.blue[4];
+          case 'external':
+            return theme.colors.orange[4];
+          case 'resource':
+            return theme.colors.gray[4];
+          default:
+            return '#999';
+        }
+      })
+      .attr('stroke-dasharray', (d) => (d.type === 'external' ? '5,5' : null));
+
+    // Create a group for each node
+    const nodeGroup = g
+      .append('g')
+      .selectAll('g')
+      .data(filteredData.nodes)
+      .join('g')
+      .call(
+        d3
+          .drag<SVGGElement, Node>()
+          .on('start', (event, d: any) => {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+          })
+          .on('drag', (event, d: any) => {
+            d.fx = event.x;
+            d.fy = event.y;
+          })
+          .on('end', (event, d: any) => {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+          })
+      )
+      .on('click', (event, d) => {
+        event.stopPropagation();
+        setSelectedNode(d);
+      });
+
+    // Add circles for nodes
+    nodeGroup
+      .append('circle')
+      .attr('r', (d) => Math.sqrt(d.size) / 2 + 5)
+      .attr('fill', (d) => colorMap[d.type])
+      .attr('stroke', (d) => statusColorMap[d.status])
+      .attr('stroke-width', 2);
+
+    // Add icons to nodes based on type
+    nodeGroup.each(function (d) {
+      const node = d3.select(this);
+      const iconSize = 12;
+
+      let icon;
+      switch (d.type) {
+        case 'html':
+          icon = '\uf1c9'; // HTML file icon
+          break;
+        case 'css':
+          icon = '\uf13c'; // CSS icon
+          break;
+        case 'js':
+          icon = '\uf3b8'; // JS icon
+          break;
+        case 'image':
+          icon = '\uf1c5'; // Image icon
+          break;
+        default:
+          icon = '\uf15b'; // Generic file icon
+      }
+
+      node
+        .append('text')
+        .attr('font-family', 'FontAwesome')
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('fill', 'white')
+        .attr('font-size', iconSize)
+        .text(icon);
+    });
+
+    // Add labels for nodes
+    nodeGroup
+      .append('text')
+      .attr('dx', 15)
+      .attr('dy', 4)
+      .text((d) => d.title)
+      .attr('font-size', '10px')
+      .attr('fill', theme.colorScheme === 'dark' ? theme.colors.gray[0] : theme.colors.gray[8]);
+
+    // Add tooltips
+    nodeGroup.append('title').text((d) => `${d.title}\nURL: ${d.url}\nType: ${d.type}\nStatus: ${d.status}`);
+
+    // Update positions on simulation tick
+    simulation.on('tick', () => {
+      link
+        .attr('x1', (d: any) => d.source.x)
+        .attr('y1', (d: any) => d.source.y)
+        .attr('x2', (d: any) => d.target.x)
+        .attr('y2', (d: any) => d.target.y);
+
+      nodeGroup.attr('transform', (d: any) => `translate(${d.x},${d.y})`);
+    });
+
+    // Handle SVG click to deselect node
+    svg.on('click', () => setSelectedNode(null));
+
+    // Handle window resize
+    const handleResize = () => {
+      if (!wrapperRef.current) return;
+      const newWidth = wrapperRef.current.clientWidth;
+      svg.attr('width', newWidth).attr('viewBox', [0, 0, newWidth, height]);
+      simulation.force('center', d3.forceCenter(newWidth / 2, height / 2));
+      simulation.alpha(0.3).restart();
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      simulation.stop();
+    };
+  }, [filteredData, theme.colorScheme, theme.colors]);
+
+  // Handle filter changes
+  const handleDepthFilterChange = (value: [number, number]) => {
+    setDepthFilter(value);
+  };
+
+  const handleTypeFilterChange = (type: keyof typeof typeFilters) => {
+    setTypeFilters({
+      ...typeFilters,
+      [type]: !typeFilters[type],
+    });
+  };
+
+  const handleStatusFilterChange = (status: keyof typeof statusFilters) => {
+    setStatusFilters({
+      ...statusFilters,
+      [status]: !statusFilters[status],
+    });
+  };
+
+  const resetFilters = () => {
+    setDepthFilter([0, 3]);
+    setTypeFilters({
+      html: true,
+      css: true,
+      js: true,
+      image: true,
+      other: true,
+    });
+    setStatusFilters({
+      ok: true,
+      error: true,
+      warning: true,
+      redirect: true,
+    });
+  };
+
+  const resetZoom = () => {
+    if (!svgRef.current || !wrapperRef.current) return;
+    const width = wrapperRef.current.clientWidth;
+    const height = 600;
+    
+    d3.select(svgRef.current)
+      .transition()
+      .duration(750)
+      .call(
+        d3.zoom<SVGSVGElement, unknown>().transform as any, 
+        d3.zoomIdentity.translate(width / 2, height / 2).scale(0.8)
+      );
+  };
+
+  return (
+    <Container size="xl" p="md">
+      <Paper p="md" radius="md" withBorder mb="md">
+        <Title order={2}>Site Structure Visualization</Title>
+        <Text color="dimmed" size="sm" mb="md">
+          Interactive visualization of website pages and their relationships
+        </Text>
+
+        <Tabs value={viewMode} onTabChange={(value) => setViewMode(value as string)} mb="md">
+          <Tabs.List>
+            <Tabs.Tab value="graph" icon={<IconLayoutGrid size={14} />}>
+              Graph View
+            </Tabs.Tab>
+            <Tabs.Tab value="list" icon={<IconLayoutList size={14} />}>
+              List View
+            </Tabs.Tab>
+          </Tabs.List>
+        </Tabs>
+
+        <Group position="apart" mb="md">
+          <Group>
+            <ActionIcon variant="default" onClick={() => resetZoom()}>
+              <IconArrowsMaximize size={16} />
+            </ActionIcon>
+            <ActionIcon
+              variant="default"
+              onClick={() => {
+                d3.select(svgRef.current)
+                  .transition()
+                  .call(d3.zoom<SVGSVGElement, unknown>().scaleBy as any, 1.2);
+              }}
+            >
+              <IconZoomIn size={16} />
+            </ActionIcon>
+            <ActionIcon
+              variant="default"
+              onClick={() => {
+                d3.select(svgRef.current)
+                  .transition()
+                  .call(d3.zoom<SVGSVGElement, unknown>().scaleBy as any, 0.8);
+              }}
+            >
+              <IconZoomOut size={16} />
+            </ActionIcon>
+          </Group>
+
+          <Group>
+            <Select
+              size="xs"
+              placeholder="Layout"
+              data={[
+                { value: 'force', label: 'Force-Directed' },
+                { value: 'radial', label: 'Radial' },
+                { value: 'tree', label: 'Tree' },
+              ]}
+              defaultValue="force"
+              style={{ width: 130 }}
+            />
+            <Button size="xs" leftIcon={<IconFilter size={14} />} onClick={resetFilters}>
+              Reset Filters
+            </Button>
+          </Group>
+        </Group>
+
+        <div style={{ display: 'flex', gap: '20px' }}>
+          <div style={{ flex: '1 1 75%' }}>
+            {viewMode === 'graph' ? (
+              <div ref={wrapperRef} style={{ border: '1px solid #eee', borderRadius: '8px', height: '600px' }}>
+                <svg ref={svgRef} style={{ width: '100%', height: '100%' }}></svg>
+              </div>
+            ) : (
+              <Paper withBorder p="md" style={{ height: '600px', overflowY: 'auto' }}>
+                <Title order={4} mb="md">
+                  Pages and Resources
+                </Title>
+                <Stack spacing="xs">
+                  {filteredData.nodes.map((node) => (
+                    <Card
+                      key={node.id}
+                      p="xs"
+                      withBorder
+                      style={{
+                        borderLeft: `4px solid ${colorMap[node.type]}`,
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => setSelectedNode(node)}
+                    >
+                      <Group position="apart">
+                        <Group>
+                          {node.type === 'html' && <IconFileText size={16} />}
+                          {node.type === 'css' && <IconBrandCss3 size={16} />}
+                          {node.type === 'js' && <IconBrandJavascript size={16} />}
+                          {node.type === 'image' && <IconPhoto size={16} />}
+                          <Text size="sm">{node.title}</Text>
+                        </Group>
+                        <Badge
+                          color={
+                            node.status === 'ok'
+                              ? 'green'
+                              : node.status === 'error'
+                              ? 'red'
+                              : node.status === 'warning'
+                              ? 'orange'
+                              : 'blue'
+                          }
+                          size="sm"
+                        >
+                          {node.status}
+                        </Badge>
+                      </Group>
+                      <Text size="xs" color="dimmed" mt={4}>
+                        {node.url}
+                      </Text>
+                    </Card>
+                  ))}
+                </Stack>
+              </Paper>
+            )}
+          </div>
+
+          <div style={{ flex: '1 1 25%' }}>
+            <Paper withBorder p="md" style={{ height: '600px', overflowY: 'auto' }}>
+              {selectedNode ? (
+                <div>
+                  <Title order={4}>{selectedNode.title}</Title>
+                  <Text size="xs" color="dimmed" mb="md">
+                    {selectedNode.url}
+                  </Text>
+
+                  <Group spacing={5} mb={10}>
+                    <Badge
+                      color={
+                        selectedNode.status === 'ok'
+                          ? 'green'
+                          : selectedNode.status === 'error'
+                          ? 'red'
+                          : selectedNode.status === 'warning'
+                          ? 'orange'
+                          : 'blue'
+                      }
+                    >
+                      {selectedNode.status}
+                    </Badge>
+                    <Badge color="gray">Depth: {selectedNode.depth}</Badge>
+                    <Badge color="blue">{selectedNode.type.toUpperCase()}</Badge>
+                  </Group>
+
+                  <Divider label="Connections" labelPosition="center" my="md" />
+
+                  <Text size="sm" weight={500} mb={5}>
+                    Incoming Links:
+                  </Text>
+                  <Stack spacing={5} mb="md">
+                    {filteredData.links
+                      .filter((link) => link.target === selectedNode.id)
+                      .map((link, i) => {
+                        const sourceNode = filteredData.nodes.find((n) => n.id === link.source);
+                        return (
+                          <Group key={`in-${i}`} spacing={5}>
+                            <IconLink size={14} />
+                            <Text size="xs">{sourceNode?.title || link.source}</Text>
+                            <Badge size="xs" variant="dot" color={link.type === 'internal' ? 'blue' : 'orange'}>
+                              {link.type}
+                            </Badge>
+                          </Group>
+                        );
+                      })}
+                    {filteredData.links.filter((link) => link.target === selectedNode.id).length === 0 && (
+                      <Text size="xs" color="dimmed">
+                        No incoming links
+                      </Text>
+                    )}
+                  </Stack>
+
+                  <Text size="sm" weight={500} mb={5}>
+                    Outgoing Links:
+                  </Text>
+                  <Stack spacing={5}>
+                    {filteredData.links
+                      .filter((link) => link.source === selectedNode.id)
+                      .map((link, i) => {
+                        const targetNode = filteredData.nodes.find((n) => n.id === link.target);
+                        return (
+                          <Group key={`out-${i}`} spacing={5}>
+                            <IconLink size={14} />
+                            <Text size="xs">{targetNode?.title || link.target}</Text>
+                            <Badge size="xs" variant="dot" color={link.type === 'internal' ? 'blue' : 'orange'}>
+                              {link.type}
+                            </Badge>
+                          </Group>
+                        );
+                      })}
+                    {filteredData.links.filter((link) => link.source === selectedNode.id).length === 0 && (
+                      <Text size="xs" color="dimmed">
+                        No outgoing links
+                      </Text>
+                    )}
+                  </Stack>
+                </div>
+              ) : (
+                <div>
+                  <Title order={4} mb="md">
+                    Filters
+                  </Title>
+
+                  <Text size="sm" weight={500} mb={5}>
+                    Page Depth:
+                  </Text>
+                  <RangeSlider
+                    min={0}
+                    max={3}
+                    step={1}
+                    minRange={0}
+                    marks={[
+                      { value: 0, label: '0' },
+                      { value: 1, label: '1' },
+                      { value: 2, label: '2' },
+                      { value: 3, label: '3' },
+                    ]}
+                    value={depthFilter}
+                    onChange={handleDepthFilterChange}
+                    mb="xl"
+                  />
+
+                  <Text size="sm" weight={500} mb={5}>
+                    Content Type:
+                  </Text>
+                  <Group mb="md">
+                    {Object.entries(typeFilters).map(([type, checked]) => (
+                      <Checkbox
+                        key={type}
+                        label={
+                          <Group spacing={5}>
+                            <ColorSwatch color={colorMap[type as keyof typeof colorMap]} size={14} />
+                            <Text size="sm">{type.toUpperCase()}</Text>
+                          </Group>
+                        }
+                        checked={checked}
+                        onChange={() => handleTypeFilterChange(type as keyof typeof typeFilters)}
+                      />
+                    ))}
+                  </Group>
+
+                  <Text size="sm" weight={500} mb={5}>
+                    Status:
+                  </Text>
+                  <Group mb="md">
+                    {Object.entries(statusFilters).map(([status, checked]) => (
+                      <Checkbox
+                        key={status}
+                        label={
+                          <Group spacing={5}>
+                            <ColorSwatch color={statusColorMap[status as keyof typeof statusColorMap]} size={14} />
+                            <Text size="sm">{status.toUpperCase()}</Text>
+                          </Group>
+                        }
+                        checked={checked}
+                        onChange={() => handleStatusFilterChange(status as keyof typeof statusFilters)}
+                      />
+                    ))}
+                  </Group>
+
+                  <Divider my="md" />
+
+                  <Text size="sm" weight={500} mb={5}>
+                    Statistics:
+                  </Text>
+                  <Group grow mb={5}>
+                    <Text size="xs" color="dimmed">
+                      Total Pages:
+                    </Text>
+                    <Text size="xs" align="right">
+                      {filteredData.nodes.filter((n) => n.type === 'html').length}
+                    </Text>
+                  </Group>
+                  <Group grow mb={5}>
+                    <Text size="xs" color="dimmed">
+                      Total Resources:
+                    </Text>
+                    <Text size="xs" align="right">
+                      {filteredData.nodes.filter((n) => n.type !== 'html').length}
+                    </Text>
+                  </Group>
+                  <Group grow mb={5}>
+                    <Text size="xs" color="dimmed">
+                      Internal Links:
+                    </Text>
+                    <Text size="xs" align="right">
+                      {filteredData.links.filter((l) => l.type === 'internal').length}
+                    </Text>
+                  </Group>
+                  <Group grow mb={5}>
+                    <Text size="xs" color="dimmed">
+                      External Links:
+                    </Text>
+                    <Text size="xs" align="right">
+                      {filteredData.links.filter((l) => l.type === 'external').length}
+                    </Text>
+                  </Group>
+                  <Group grow mb={5}>
+                    <Text size="xs" color="dimmed">
+                      Resource Links:
+                    </Text>
+                    <Text size="xs" align="right">
+                      {filteredData.links.filter((l) => l.type === 'resource').length}
+                    </Text>
+                  </Group>
+                </div>
+              )}
+            </Paper>
+          </div>
+        </div>
+
+        <Box mt="md">
+          <Group spacing="xs">
+            <IconInfoCircle size={16} color="gray" />
+            <Text size="xs" color="dimmed">
+              Drag nodes to reposition them. Click on a node to view details. Use mouse wheel to zoom in/out.
+            </Text>
+          </Group>
+        </Box>
+      </Paper>
+    </Container>
+  );
+};
+
+export default SiteGraph;
