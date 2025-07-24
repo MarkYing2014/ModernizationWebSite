@@ -17,20 +17,20 @@ import {
   Box
 } from '@mantine/core';
 import { 
-  IconHome2, 
-  IconLayoutDashboard, 
-  IconBrowserPlus, 
-  IconListDetails, 
-  IconGraph, 
-  IconPalette, 
-  IconSettings, 
-  IconLogout, 
-  IconBell, 
-  IconMoon, 
-  IconSun, 
-  IconChevronLeft, 
-  IconChevronRight, 
-  IconUser 
+  Home2, 
+  LayoutDashboard, 
+  BrowserPlus, 
+  ListDetails, 
+  Graph, 
+  Palette, 
+  Settings, 
+  Logout, 
+  Bell, 
+  Moon, 
+  Sun, 
+  ChevronLeft, 
+  ChevronRight, 
+  User 
 } from 'tabler-icons-react';
 import { NavLink } from 'react-router-dom';
 
@@ -109,6 +109,8 @@ const MainLayout: React.FC = () => {
         main: {
           background: darkMode ? 'var(--color-gray-900)' : 'var(--color-gray-50)',
           padding: 0,
+          width: '100%',
+          maxWidth: 'none',
         },
       }}
       navbarOffsetBreakpoint="sm"
@@ -117,7 +119,7 @@ const MainLayout: React.FC = () => {
           p="md"
           hiddenBreakpoint="sm"
           hidden={!opened}
-          width={{ sm: collapsed ? 80 : 280 }}
+          width={{ sm: collapsed ? 60 : 200 }}
           className={`dashboard-sidebar ${collapsed ? 'collapsed' : ''}`}
           style={{
             transition: 'width 0.3s ease',
@@ -139,43 +141,43 @@ const MainLayout: React.FC = () => {
 
           <Navbar.Section grow>
             <NavItem 
-              icon={<IconHome2 size={20} />} 
+              icon={<Home2 size={20} />} 
               label="Home" 
               to="/dashboard" 
               collapsed={collapsed} 
             />
             <NavItem 
-              icon={<IconLayoutDashboard size={20} />} 
+              icon={<LayoutDashboard size={20} />} 
               label="Dashboard" 
               to="/dashboard" 
               collapsed={collapsed} 
             />
             <NavItem 
-              icon={<IconBrowserPlus size={20} />} 
+              icon={<BrowserPlus size={20} />} 
               label="New Project" 
               to="/projects/new" 
               collapsed={collapsed} 
             />
             <NavItem 
-              icon={<IconListDetails size={20} />} 
+              icon={<ListDetails size={20} />} 
               label="Projects" 
               to="/projects" 
               collapsed={collapsed} 
             />
             <NavItem 
-              icon={<IconGraph size={20} />} 
+              icon={<Graph size={20} />} 
               label="Visualizations" 
               to="/projects/demo/visualization" 
               collapsed={collapsed} 
             />
             <NavItem 
-              icon={<IconPalette size={20} />} 
+              icon={<Palette size={20} />} 
               label="Design Options" 
               to="/projects/demo/designs" 
               collapsed={collapsed} 
             />
             <NavItem 
-              icon={<IconSettings size={20} />} 
+              icon={<Settings size={20} />} 
               label="Settings" 
               to="/settings" 
               collapsed={collapsed} 
@@ -192,7 +194,7 @@ const MainLayout: React.FC = () => {
                 onClick={() => setCollapsed(!collapsed)}
                 title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
-                {collapsed ? <IconChevronRight size={16} /> : <IconChevronLeft size={16} />}
+                {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
               </ActionIcon>
             </Group>
           </Navbar.Section>
@@ -224,13 +226,13 @@ const MainLayout: React.FC = () => {
             <Group>
               <Tooltip label="Notifications">
                 <ActionIcon variant="default" size={36}>
-                  <IconBell size={18} />
+                  <Bell size={18} />
                 </ActionIcon>
               </Tooltip>
               
               <Tooltip label={darkMode ? "Light mode" : "Dark mode"}>
                 <ActionIcon variant="default" size={36} onClick={toggleDarkMode}>
-                  {darkMode ? <IconSun size={18} /> : <IconMoon size={18} />}
+                  {darkMode ? <Sun size={18} /> : <Moon size={18} />}
                 </ActionIcon>
               </Tooltip>
               
@@ -250,7 +252,7 @@ const MainLayout: React.FC = () => {
         </Header>
       }
     >
-      <div className="dashboard-main">
+      <div className="dashboard-main" style={{ width: '100%', maxWidth: 'none', padding: 0 }}>
         <Outlet />
       </div>
     </AppShell>

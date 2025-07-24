@@ -1,0 +1,341 @@
+import React, { useState, useEffect } from 'react';
+import {
+  Container,
+  Title,
+  Text,
+  Button,
+  Card,
+  Group,
+  Stack,
+  Progress,
+  Badge,
+  ActionIcon,
+  ScrollArea,
+  Alert,
+  Loader,
+} from '@mantine/core';
+import {
+  ArrowLeft,
+  PlayerStop,
+  Refresh,
+  Check,
+  X,
+  AlertCircle,
+} from 'tabler-icons-react';
+import { useNavigate, useParams } from 'react-router-dom';
+
+interface CrawlLog {
+  id: string;
+  timestamp: string;
+  type: 'info' | 'success' | 'warning' | 'error';
+  message: string;
+  url?: string;
+}
+
+const CrawlProgress: React.FC = () => {
+  const navigate = useNavigate();
+  const { projectId } = useParams();
+  const [isRunning, setIsRunning] = useState(true);
+  const [progress, setProgress] = useState(45);
+  const [logs, setLogs] = useState<CrawlLog[]>([
+    {
+      id: '1',
+      timestamp: '14:30:15',
+      type: 'info',
+      message: 'Starting website crawl...',
+    },
+    {
+      id: '2',
+      timestamp: '14:30:16',
+      type: 'success',
+      message: 'Connected to target website',
+      url: 'https://example-store.com',
+    },
+    {
+      id: '3',
+      timestamp: '14:30:18',
+      type: 'info',
+      message: 'Analyzing homepage structure...',
+      url: 'https://example-store.com/',
+    },
+    {
+      id: '4',
+      timestamp: '14:30:22',
+      type: 'success',
+      message: 'Found 45 internal links',
+      url: 'https://example-store.com/',
+    },
+    {
+      id: '5',
+      timestamp: '14:30:25',
+      type: 'warning',
+      message: 'Large image detected (2.5MB) - may affect performance',
+      url: 'https://example-store.com/hero-banner.jpg',
+    },
+    {
+      id: '6',
+      timestamp: '14:30:28',
+      type: 'info',
+      message: 'Crawling product pages...',
+    },
+    {
+      id: '7',
+      timestamp: '14:30:35',
+      type: 'error',
+      message: '404 error encountered',
+      url: 'https://example-store.com/old-product-page',
+    },
+    {
+      id: '8',
+      timestamp: '14:30:40',
+      type: 'success',
+      message: 'Processed 25 of 156 pages',
+    },
+  ]);
+
+  const stats = {
+    totalPages: 156,
+    processedPages: Math.floor((progress / 100) * 156),
+    foundIssues: 12,
+    estimatedTimeRemaining: '8 minutes',
+  };
+
+  // Simulate progress updates
+  useEffect(() => {
+    if (!isRunning) return;
+
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          setIsRunning(false);
+          return 100;
+        }
+        return prev + Math.random() * 2;
+      });
+
+      // Add new log entries occasionally
+      if (Math.random() < 0.3) {
+        const newLog: CrawlLog = {
+          id: Date.now().toString(),
+          timestamp: new Date().toLocaleTimeString(),
+          type: ['info', 'success', 'warning'][Math.floor(Math.random() * 3)] as any,
+          message: [
+            'Processing page content...',
+            'Analyzing CSS structure...',
+            'Checking accessibility compliance...',
+            'Validating HTML markup...',
+            'Scanning for performance issues...',
+          ][Math.floor(Math.random() * 5)],
+          url: `https://example-store.com/page-${Math.floor(Math.random() * 100)}`,
+        };
+        
+        setLogs(prev => [...prev, newLog].slice(-20)); // Keep only last 20 logs
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [isRunning]);
+
+  const getLogIcon = (type: string) => {
+    switch (type) {
+      case 'success': return <Check size={14} color="green" />;
+      case 'error': return <X size={14} color="red" />;
+      case 'warning': return <AlertCircle size={14} color="orange" />;
+      default: return <Loader size={14} />;
+    }
+  };
+
+  const getLogColor = (type: string) => {
+    switch (type) {
+      case 'success': return 'green';
+      case 'error': return 'red';
+      case 'warning': return 'orange';
+      default: return 'blue';
+    }
+  };
+
+  return (
+    <Container size="xl" py="xl">
+      <Stack spacing="xl">
+        {/* Header */}
+        <Group>
+          <ActionIcon
+            variant="subtle"
+            onClick={() => navigate(`/projects/${projectId}`)}
+          >
+            <ArrowLeft size={16} />
+          </ActionIcon>
+          <div style={{ flex: 1 }}>
+            <Group position="apart">
+              <div>
+                <Title order={2}>Website Crawl Progress</Title>
+                <Text color="dimmed">E-commerce Website</Text>
+              </div>
+              <Group>
+                {isRunning ? (
+                  <Button
+                    leftIcon={<PlayerStop size={16} />}
+                    color="red"
+                    variant="light"
+                    onClick={() => setIsRunning(false)}
+                  >
+                    Stop Crawl
+                  </Button>
+                ) : progress < 100 ? (
+                  <Button
+                    leftIcon={<Refresh size={16} />}
+                    onClick={() => setIsRunning(true)}
+                  >
+                    Resume Crawl
+                  </Button>
+                ) : (
+                  <Button
+                    leftIcon={<Refresh size={16} />}
+                    onClick={() => {
+                      setProgress(0);
+                      setIsRunning(true);
+                      setLogs([]);
+                    }}
+                  >
+                    Start New Crawl
+                  </Button>
+                )}
+              </Group>
+            </Group>
+          </div>
+        </Group>
+
+        {/* Status Alert */}
+        {progress >= 100 && (
+          <Alert
+            icon={<Check size={16} />}
+            title="Crawl Completed Successfully!"
+            color="green"
+          >
+            Website analysis is complete. You can now review the results and identified issues.
+          </Alert>
+        )}
+
+        {/* Progress Overview */}
+        <Card padding="lg" radius="md" withBorder>
+          <Stack spacing="md">
+            <Group position="apart">
+              <Title order={4}>Overall Progress</Title>
+              <Badge
+                color={isRunning ? 'blue' : progress >= 100 ? 'green' : 'gray'}
+                variant="light"
+              >
+                {isRunning ? 'Running' : progress >= 100 ? 'Completed' : 'Paused'}
+              </Badge>
+            </Group>
+            
+            <Progress
+              value={progress}
+              size="xl"
+              radius="xl"
+              animate={isRunning}
+            />
+            
+            <Group position="apart">
+              <Text size="sm" color="dimmed">
+                {Math.round(progress)}% Complete
+              </Text>
+              <Text size="sm" color="dimmed">
+                {isRunning && progress < 100 ? `Est. ${stats.estimatedTimeRemaining} remaining` : ''}
+              </Text>
+            </Group>
+          </Stack>
+        </Card>
+
+        {/* Stats Grid */}
+        <Group grow>
+          <Card padding="md" radius="md" withBorder>
+            <Stack spacing="xs" align="center">
+              <Text size="xs" color="dimmed" transform="uppercase" weight={700}>
+                Total Pages
+              </Text>
+              <Text size="xl" weight={700}>
+                {stats.totalPages}
+              </Text>
+            </Stack>
+          </Card>
+          
+          <Card padding="md" radius="md" withBorder>
+            <Stack spacing="xs" align="center">
+              <Text size="xs" color="dimmed" transform="uppercase" weight={700}>
+                Processed
+              </Text>
+              <Text size="xl" weight={700} color="blue">
+                {stats.processedPages}
+              </Text>
+            </Stack>
+          </Card>
+          
+          <Card padding="md" radius="md" withBorder>
+            <Stack spacing="xs" align="center">
+              <Text size="xs" color="dimmed" transform="uppercase" weight={700}>
+                Issues Found
+              </Text>
+              <Text size="xl" weight={700} color="orange">
+                {stats.foundIssues}
+              </Text>
+            </Stack>
+          </Card>
+        </Group>
+
+        {/* Live Logs */}
+        <Card padding="lg" radius="md" withBorder>
+          <Stack spacing="md">
+            <Group position="apart">
+              <Title order={4}>Live Crawl Log</Title>
+              {isRunning && <Loader size="sm" />}
+            </Group>
+            
+            <ScrollArea style={{ height: 400 }}>
+              <Stack spacing="xs">
+                {logs.map((log) => (
+                  <Group key={log.id} spacing="sm" noWrap>
+                    <Text size="xs" color="dimmed" style={{ minWidth: 60 }}>
+                      {log.timestamp}
+                    </Text>
+                    {getLogIcon(log.type)}
+                    <div style={{ flex: 1 }}>
+                      <Text size="sm">{log.message}</Text>
+                      {log.url && (
+                        <Text size="xs" color="dimmed" truncate>
+                          {log.url}
+                        </Text>
+                      )}
+                    </div>
+                    <Badge size="xs" color={getLogColor(log.type)} variant="light">
+                      {log.type}
+                    </Badge>
+                  </Group>
+                ))}
+              </Stack>
+            </ScrollArea>
+          </Stack>
+        </Card>
+
+        {/* Action Buttons */}
+        {progress >= 100 && (
+          <Group position="center">
+            <Button
+              onClick={() => navigate(`/projects/${projectId}/issues`)}
+            >
+              Review Issues
+            </Button>
+            <Button
+              variant="light"
+              onClick={() => navigate(`/projects/${projectId}/visualization`)}
+            >
+              View Site Map
+            </Button>
+          </Group>
+        )}
+      </Stack>
+    </Container>
+  );
+};
+
+export default CrawlProgress;

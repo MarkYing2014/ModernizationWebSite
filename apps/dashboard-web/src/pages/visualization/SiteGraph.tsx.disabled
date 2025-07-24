@@ -21,18 +21,18 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import {
-  IconZoomIn,
-  IconZoomOut,
-  IconArrowsMaximize,
-  IconFilter,
-  IconInfoCircle,
-  IconLink,
-  IconFileText,
-  IconPhoto,
-  IconBrandJavascript,
-  IconBrandCss3,
-  IconLayoutGrid,
-  IconLayoutList,
+  ZoomIn,
+  ZoomOut,
+  ArrowsMaximize,
+  Filter,
+  InfoCircle,
+  Link,
+  FileText,
+  Photo,
+  BrandJavascript,
+  BrandCss3,
+  LayoutGrid,
+  LayoutList,
 } from 'tabler-icons-react';
 import * as d3 from 'd3';
 
@@ -417,10 +417,10 @@ const SiteGraph: React.FC = () => {
 
         <Tabs value={viewMode} onTabChange={(value) => setViewMode(value as string)} mb="md">
           <Tabs.List>
-            <Tabs.Tab value="graph" icon={<IconLayoutGrid size={14} />}>
+            <Tabs.Tab value="graph" icon={<LayoutGrid size={14} />}>
               Graph View
             </Tabs.Tab>
-            <Tabs.Tab value="list" icon={<IconLayoutList size={14} />}>
+            <Tabs.Tab value="list" icon={<LayoutList size={14} />}>
               List View
             </Tabs.Tab>
           </Tabs.List>

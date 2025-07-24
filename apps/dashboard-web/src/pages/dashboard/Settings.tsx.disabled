@@ -1,0 +1,393 @@
+import React, { useState } from 'react';
+import {
+  Container,
+  Title,
+  Text,
+  Card,
+  Group,
+  Stack,
+  Button,
+  TextInput,
+  Select,
+  Switch,
+  Tabs,
+  PasswordInput,
+  ActionIcon,
+  Badge,
+  Alert,
+} from '@mantine/core';
+import {
+  User,
+  Bell,
+  Shield,
+  Palette,
+  Database,
+  Check,
+  X,
+} from 'tabler-icons-react';
+
+const Settings: React.FC = () => {
+  const [notifications, setNotifications] = useState({
+    email: true,
+    push: false,
+    crawlComplete: true,
+    issuesFound: true,
+    weeklyReport: false,
+  });
+
+  const [profile, setProfile] = useState({
+    name: 'Demo User',
+    email: 'demo@example.com',
+    company: 'Example Corp',
+    timezone: 'America/New_York',
+  });
+
+  const [theme, setTheme] = useState({
+    darkMode: false,
+    colorScheme: 'blue',
+    compactMode: false,
+  });
+
+  return (
+    <Container size="md" py="xl">
+      <Stack spacing="xl">
+        {/* Header */}
+        <div>
+          <Title order={2}>Settings</Title>
+          <Text color="dimmed">Manage your account and application preferences</Text>
+        </div>
+
+        {/* Settings Tabs */}
+        <Tabs defaultValue="profile">
+          <Tabs.List>
+            <Tabs.Tab value="profile" icon={<User size={14} />}>
+              Profile
+            </Tabs.Tab>
+            <Tabs.Tab value="notifications" icon={<Bell size={14} />}>
+              Notifications
+            </Tabs.Tab>
+            <Tabs.Tab value="security" icon={<Shield size={14} />}>
+              Security
+            </Tabs.Tab>
+            <Tabs.Tab value="appearance" icon={<Palette size={14} />}>
+              Appearance
+            </Tabs.Tab>
+            <Tabs.Tab value="data" icon={<Database size={14} />}>
+              Data & Privacy
+            </Tabs.Tab>
+          </Tabs.List>
+
+          {/* Profile Tab */}
+          <Tabs.Panel value="profile" pt="xl">
+            <Card padding="lg" radius="md" withBorder>
+              <Stack spacing="md">
+                <Title order={4}>Profile Information</Title>
+                
+                <Group grow>
+                  <TextInput
+                    label="Full Name"
+                    value={profile.name}
+                    onChange={(e) => setProfile({ ...profile, name: e.currentTarget.value })}
+                  />
+                  <TextInput
+                    label="Email Address"
+                    value={profile.email}
+                    onChange={(e) => setProfile({ ...profile, email: e.currentTarget.value })}
+                  />
+                </Group>
+
+                <Group grow>
+                  <TextInput
+                    label="Company"
+                    value={profile.company}
+                    onChange={(e) => setProfile({ ...profile, company: e.currentTarget.value })}
+                  />
+                  <Select
+                    label="Timezone"
+                    value={profile.timezone}
+                    onChange={(value) => setProfile({ ...profile, timezone: value || '' })}
+                    data={[
+                      { value: 'America/New_York', label: 'Eastern Time (ET)' },
+                      { value: 'America/Chicago', label: 'Central Time (CT)' },
+                      { value: 'America/Denver', label: 'Mountain Time (MT)' },
+                      { value: 'America/Los_Angeles', label: 'Pacific Time (PT)' },
+                      { value: 'Europe/London', label: 'Greenwich Mean Time (GMT)' },
+                      { value: 'Europe/Paris', label: 'Central European Time (CET)' },
+                    ]}
+                  />
+                </Group>
+
+                <Group position="right">
+                  <Button variant="light">Cancel</Button>
+                  <Button>Save Changes</Button>
+                </Group>
+              </Stack>
+            </Card>
+          </Tabs.Panel>
+
+          {/* Notifications Tab */}
+          <Tabs.Panel value="notifications" pt="xl">
+            <Stack spacing="md">
+              <Card padding="lg" radius="md" withBorder>
+                <Stack spacing="md">
+                  <Title order={4}>Notification Preferences</Title>
+                  
+                  <Stack spacing="sm">
+                    <Group position="apart">
+                      <div>
+                        <Text size="sm" weight={500}>Email Notifications</Text>
+                        <Text size="xs" color="dimmed">Receive notifications via email</Text>
+                      </div>
+                      <Switch
+                        checked={notifications.email}
+                        onChange={(e) => setNotifications({ ...notifications, email: e.currentTarget.checked })}
+                      />
+                    </Group>
+
+                    <Group position="apart">
+                      <div>
+                        <Text size="sm" weight={500}>Push Notifications</Text>
+                        <Text size="xs" color="dimmed">Receive browser push notifications</Text>
+                      </div>
+                      <Switch
+                        checked={notifications.push}
+                        onChange={(e) => setNotifications({ ...notifications, push: e.currentTarget.checked })}
+                      />
+                    </Group>
+
+                    <Group position="apart">
+                      <div>
+                        <Text size="sm" weight={500}>Crawl Completion</Text>
+                        <Text size="xs" color="dimmed">Notify when website crawls complete</Text>
+                      </div>
+                      <Switch
+                        checked={notifications.crawlComplete}
+                        onChange={(e) => setNotifications({ ...notifications, crawlComplete: e.currentTarget.checked })}
+                      />
+                    </Group>
+
+                    <Group position="apart">
+                      <div>
+                        <Text size="sm" weight={500}>Issues Found</Text>
+                        <Text size="xs" color="dimmed">Notify when new issues are detected</Text>
+                      </div>
+                      <Switch
+                        checked={notifications.issuesFound}
+                        onChange={(e) => setNotifications({ ...notifications, issuesFound: e.currentTarget.checked })}
+                      />
+                    </Group>
+
+                    <Group position="apart">
+                      <div>
+                        <Text size="sm" weight={500}>Weekly Reports</Text>
+                        <Text size="xs" color="dimmed">Receive weekly summary reports</Text>
+                      </div>
+                      <Switch
+                        checked={notifications.weeklyReport}
+                        onChange={(e) => setNotifications({ ...notifications, weeklyReport: e.currentTarget.checked })}
+                      />
+                    </Group>
+                  </Stack>
+
+                  <Group position="right">
+                    <Button>Save Preferences</Button>
+                  </Group>
+                </Stack>
+              </Card>
+            </Stack>
+          </Tabs.Panel>
+
+          {/* Security Tab */}
+          <Tabs.Panel value="security" pt="xl">
+            <Stack spacing="md">
+              <Card padding="lg" radius="md" withBorder>
+                <Stack spacing="md">
+                  <Title order={4}>Change Password</Title>
+                  
+                  <PasswordInput
+                    label="Current Password"
+                    placeholder="Enter current password"
+                  />
+                  
+                  <Group grow>
+                    <PasswordInput
+                      label="New Password"
+                      placeholder="Enter new password"
+                    />
+                    <PasswordInput
+                      label="Confirm Password"
+                      placeholder="Confirm new password"
+                    />
+                  </Group>
+
+                  <Group position="right">
+                    <Button>Update Password</Button>
+                  </Group>
+                </Stack>
+              </Card>
+
+              <Card padding="lg" radius="md" withBorder>
+                <Stack spacing="md">
+                  <Title order={4}>Two-Factor Authentication</Title>
+                  <Text size="sm" color="dimmed">
+                    Add an extra layer of security to your account
+                  </Text>
+                  
+                  <Group position="apart">
+                    <div>
+                      <Text size="sm" weight={500}>2FA Status</Text>
+                      <Badge color="red" variant="light">Disabled</Badge>
+                    </div>
+                    <Button variant="light">Enable 2FA</Button>
+                  </Group>
+                </Stack>
+              </Card>
+
+              <Card padding="lg" radius="md" withBorder>
+                <Stack spacing="md">
+                  <Title order={4}>Active Sessions</Title>
+                  
+                  <Stack spacing="sm">
+                    <Group position="apart">
+                      <div>
+                        <Text size="sm" weight={500}>Current Session</Text>
+                        <Text size="xs" color="dimmed">Chrome on macOS • New York, NY</Text>
+                      </div>
+                      <Badge color="green" variant="light">Active</Badge>
+                    </Group>
+                    
+                    <Group position="apart">
+                      <div>
+                        <Text size="sm" weight={500}>Mobile Session</Text>
+                        <Text size="xs" color="dimmed">Safari on iOS • Last active 2 hours ago</Text>
+                      </div>
+                      <ActionIcon color="red" variant="light">
+                        <X size={16} />
+                      </ActionIcon>
+                    </Group>
+                  </Stack>
+
+                  <Group position="right">
+                    <Button variant="light" color="red">Revoke All Sessions</Button>
+                  </Group>
+                </Stack>
+              </Card>
+            </Stack>
+          </Tabs.Panel>
+
+          {/* Appearance Tab */}
+          <Tabs.Panel value="appearance" pt="xl">
+            <Card padding="lg" radius="md" withBorder>
+              <Stack spacing="md">
+                <Title order={4}>Appearance Settings</Title>
+                
+                <Group position="apart">
+                  <div>
+                    <Text size="sm" weight={500}>Dark Mode</Text>
+                    <Text size="xs" color="dimmed">Switch to dark theme</Text>
+                  </div>
+                  <Switch
+                    checked={theme.darkMode}
+                    onChange={(e) => setTheme({ ...theme, darkMode: e.currentTarget.checked })}
+                  />
+                </Group>
+
+                <Group position="apart">
+                  <div>
+                    <Text size="sm" weight={500}>Compact Mode</Text>
+                    <Text size="xs" color="dimmed">Reduce spacing and padding</Text>
+                  </div>
+                  <Switch
+                    checked={theme.compactMode}
+                    onChange={(e) => setTheme({ ...theme, compactMode: e.currentTarget.checked })}
+                  />
+                </Group>
+
+                <div>
+                  <Text size="sm" weight={500} mb="xs">Color Scheme</Text>
+                  <Select
+                    value={theme.colorScheme}
+                    onChange={(value) => setTheme({ ...theme, colorScheme: value || 'blue' })}
+                    data={[
+                      { value: 'blue', label: 'Blue' },
+                      { value: 'green', label: 'Green' },
+                      { value: 'purple', label: 'Purple' },
+                      { value: 'red', label: 'Red' },
+                      { value: 'orange', label: 'Orange' },
+                    ]}
+                  />
+                </div>
+
+                <Group position="right">
+                  <Button>Apply Changes</Button>
+                </Group>
+              </Stack>
+            </Card>
+          </Tabs.Panel>
+
+          {/* Data & Privacy Tab */}
+          <Tabs.Panel value="data" pt="xl">
+            <Stack spacing="md">
+              <Card padding="lg" radius="md" withBorder>
+                <Stack spacing="md">
+                  <Title order={4}>Data Management</Title>
+                  
+                  <Group position="apart">
+                    <div>
+                      <Text size="sm" weight={500}>Export Data</Text>
+                      <Text size="xs" color="dimmed">Download all your project data</Text>
+                    </div>
+                    <Button variant="light">Export</Button>
+                  </Group>
+
+                  <Group position="apart">
+                    <div>
+                      <Text size="sm" weight={500}>Clear Cache</Text>
+                      <Text size="xs" color="dimmed">Clear stored crawl data and cache</Text>
+                    </div>
+                    <Button variant="light">Clear</Button>
+                  </Group>
+                </Stack>
+              </Card>
+
+              <Card padding="lg" radius="md" withBorder>
+                <Stack spacing="md">
+                  <Title order={4}>Privacy Settings</Title>
+                  
+                  <Group position="apart">
+                    <div>
+                      <Text size="sm" weight={500}>Analytics</Text>
+                      <Text size="xs" color="dimmed">Help improve the platform with usage data</Text>
+                    </div>
+                    <Switch defaultChecked />
+                  </Group>
+
+                  <Group position="apart">
+                    <div>
+                      <Text size="sm" weight={500}>Error Reporting</Text>
+                      <Text size="xs" color="dimmed">Automatically send error reports</Text>
+                    </div>
+                    <Switch defaultChecked />
+                  </Group>
+                </Stack>
+              </Card>
+
+              <Alert color="red" title="Danger Zone" icon={<X size={16} />}>
+                <Stack spacing="sm">
+                  <Text size="sm">
+                    Permanently delete your account and all associated data. This action cannot be undone.
+                  </Text>
+                  <Group position="right">
+                    <Button color="red" variant="light">Delete Account</Button>
+                  </Group>
+                </Stack>
+              </Alert>
+            </Stack>
+          </Tabs.Panel>
+        </Tabs>
+      </Stack>
+    </Container>
+  );
+};
+
+export default Settings;

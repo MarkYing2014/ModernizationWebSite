@@ -1,0 +1,361 @@
+import React, { useState } from 'react';
+import {
+  Container,
+  Title,
+  Text,
+  Card,
+  Group,
+  Stack,
+  Button,
+  ActionIcon,
+  Grid,
+  Image,
+  Badge,
+  Modal,
+  Tabs,
+  ColorSwatch,
+  Switch,
+} from '@mantine/core';
+import {
+  ArrowLeft,
+  Eye,
+  Download,
+  Palette,
+  Layout,
+  Typography,
+} from 'tabler-icons-react';
+import { useNavigate, useParams } from 'react-router-dom';
+
+interface DesignOption {
+  id: string;
+  name: string;
+  description: string;
+  category: 'modern' | 'minimal' | 'corporate' | 'creative';
+  preview: string;
+  colors: string[];
+  features: string[];
+  recommended?: boolean;
+}
+
+const mockDesignOptions: DesignOption[] = [
+  {
+    id: '1',
+    name: 'Modern E-commerce',
+    description: 'Clean, contemporary design with focus on product showcase and user experience.',
+    category: 'modern',
+    preview: '/api/placeholder/400/300',
+    colors: ['#2563eb', '#f8fafc', '#1e293b', '#10b981'],
+    features: ['Responsive Grid Layout', 'Product Quick View', 'Advanced Filtering', 'Mobile-First Design'],
+    recommended: true,
+  },
+  {
+    id: '2',
+    name: 'Minimal Store',
+    description: 'Simplified design emphasizing whitespace and typography for elegant product presentation.',
+    category: 'minimal',
+    preview: '/api/placeholder/400/300',
+    colors: ['#000000', '#ffffff', '#6b7280', '#f3f4f6'],
+    features: ['Clean Typography', 'Minimal Navigation', 'Focus on Content', 'Fast Loading'],
+  },
+  {
+    id: '3',
+    name: 'Corporate Professional',
+    description: 'Professional business design with trust-building elements and clear information hierarchy.',
+    category: 'corporate',
+    preview: '/api/placeholder/400/300',
+    colors: ['#1e40af', '#ffffff', '#374151', '#e5e7eb'],
+    features: ['Trust Badges', 'Professional Layout', 'Clear CTAs', 'Business-Focused'],
+  },
+  {
+    id: '4',
+    name: 'Creative Showcase',
+    description: 'Bold, creative design with unique layouts and interactive elements.',
+    category: 'creative',
+    preview: '/api/placeholder/400/300',
+    colors: ['#7c3aed', '#ec4899', '#f59e0b', '#000000'],
+    features: ['Creative Layouts', 'Interactive Elements', 'Bold Typography', 'Unique Animations'],
+  },
+];
+
+const DesignOptions: React.FC = () => {
+  const navigate = useNavigate();
+  const { projectId } = useParams();
+  const [selectedDesign, setSelectedDesign] = useState<DesignOption | null>(null);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+
+  const filteredDesigns = categoryFilter
+    ? mockDesignOptions.filter(design => design.category === categoryFilter)
+    : mockDesignOptions;
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'modern': return 'blue';
+      case 'minimal': return 'gray';
+      case 'corporate': return 'indigo';
+      case 'creative': return 'purple';
+      default: return 'gray';
+    }
+  };
+
+  const handleApplyDesign = (design: DesignOption) => {
+    // In a real app, this would trigger the design application process
+    console.log('Applying design:', design.name);
+    // Could navigate to a preview or confirmation page
+  };
+
+  return (
+    <Container size="xl" py="xl">
+      <Stack spacing="xl">
+        {/* Header */}
+        <Group>
+          <ActionIcon
+            variant="subtle"
+            onClick={() => navigate(`/projects/${projectId}`)}
+          >
+            <ArrowLeft size={16} />
+          </ActionIcon>
+          <div style={{ flex: 1 }}>
+            <Title order={2}>Design Options</Title>
+            <Text color="dimmed">Choose a modern design template for your website</Text>
+          </div>
+        </Group>
+
+        {/* Category Filters */}
+        <Tabs value={categoryFilter} onTabChange={setCategoryFilter}>
+          <Tabs.List>
+            <Tabs.Tab value={null}>All Designs</Tabs.Tab>
+            <Tabs.Tab value="modern">Modern</Tabs.Tab>
+            <Tabs.Tab value="minimal">Minimal</Tabs.Tab>
+            <Tabs.Tab value="corporate">Corporate</Tabs.Tab>
+            <Tabs.Tab value="creative">Creative</Tabs.Tab>
+          </Tabs.List>
+        </Tabs>
+
+        {/* Design Options Grid */}
+        <Grid>
+          {filteredDesigns.map((design) => (
+            <Grid.Col key={design.id} span={12} md={6} lg={4}>
+              <Card shadow="sm" padding="lg" radius="md" withBorder>
+                <Card.Section>
+                  <div style={{ position: 'relative' }}>
+                    <Image
+                      src={design.preview}
+                      height={200}
+                      alt={design.name}
+                      withPlaceholder
+                    />
+                    {design.recommended && (
+                      <Badge
+                        color="green"
+                        variant="filled"
+                        style={{
+                          position: 'absolute',
+                          top: 10,
+                          right: 10,
+                        }}
+                      >
+                        Recommended
+                      </Badge>
+                    )}
+                  </div>
+                </Card.Section>
+
+                <Stack spacing="md" mt="md">
+                  <Group position="apart">
+                    <Title order={4}>{design.name}</Title>
+                    <Badge color={getCategoryColor(design.category)} variant="light">
+                      {design.category}
+                    </Badge>
+                  </Group>
+
+                  <Text size="sm" color="dimmed">
+                    {design.description}
+                  </Text>
+
+                  {/* Color Palette */}
+                  <Group spacing="xs">
+                    <Text size="xs" color="dimmed">Colors:</Text>
+                    {design.colors.map((color, index) => (
+                      <ColorSwatch key={index} color={color} size={16} />
+                    ))}
+                  </Group>
+
+                  {/* Features */}
+                  <Stack spacing={4}>
+                    <Text size="xs" color="dimmed" transform="uppercase" weight={700}>
+                      Key Features
+                    </Text>
+                    {design.features.slice(0, 3).map((feature, index) => (
+                      <Text key={index} size="xs">
+                        • {feature}
+                      </Text>
+                    ))}
+                    {design.features.length > 3 && (
+                      <Text size="xs" color="dimmed">
+                        +{design.features.length - 3} more features
+                      </Text>
+                    )}
+                  </Stack>
+
+                  {/* Action Buttons */}
+                  <Group spacing="xs" mt="md">
+                    <Button
+                      variant="light"
+                      size="sm"
+                      leftIcon={<Eye size={14} />}
+                      onClick={() => {
+                        setSelectedDesign(design);
+                        setPreviewModalOpen(true);
+                      }}
+                    >
+                      Preview
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => handleApplyDesign(design)}
+                    >
+                      Apply Design
+                    </Button>
+                  </Group>
+                </Stack>
+              </Card>
+            </Grid.Col>
+          ))}
+        </Grid>
+
+        {/* Preview Modal */}
+        <Modal
+          opened={previewModalOpen}
+          onClose={() => setPreviewModalOpen(false)}
+          title={selectedDesign?.name}
+          size="xl"
+        >
+          {selectedDesign && (
+            <Stack spacing="md">
+              <Image
+                src={selectedDesign.preview}
+                alt={selectedDesign.name}
+                withPlaceholder
+              />
+              
+              <Tabs defaultValue="overview">
+                <Tabs.List>
+                  <Tabs.Tab value="overview" icon={<Eye size={14} />}>
+                    Overview
+                  </Tabs.Tab>
+                  <Tabs.Tab value="colors" icon={<Palette size={14} />}>
+                    Colors
+                  </Tabs.Tab>
+                  <Tabs.Tab value="layout" icon={<Layout size={14} />}>
+                    Layout
+                  </Tabs.Tab>
+                  <Tabs.Tab value="typography" icon={<Typography size={14} />}>
+                    Typography
+                  </Tabs.Tab>
+                </Tabs.List>
+
+                <Tabs.Panel value="overview" pt="md">
+                  <Stack spacing="md">
+                    <Text>{selectedDesign.description}</Text>
+                    
+                    <div>
+                      <Text size="sm" weight={500} mb="xs">All Features:</Text>
+                      <Stack spacing={4}>
+                        {selectedDesign.features.map((feature, index) => (
+                          <Text key={index} size="sm">• {feature}</Text>
+                        ))}
+                      </Stack>
+                    </div>
+                  </Stack>
+                </Tabs.Panel>
+
+                <Tabs.Panel value="colors" pt="md">
+                  <Stack spacing="md">
+                    <Text size="sm">Color Palette:</Text>
+                    <Group>
+                      {selectedDesign.colors.map((color, index) => (
+                        <Stack key={index} spacing={4} align="center">
+                          <ColorSwatch color={color} size={40} />
+                          <Text size="xs" color="dimmed">{color}</Text>
+                        </Stack>
+                      ))}
+                    </Group>
+                  </Stack>
+                </Tabs.Panel>
+
+                <Tabs.Panel value="layout" pt="md">
+                  <Text size="sm" color="dimmed">
+                    Layout specifications and responsive breakpoints will be shown here.
+                  </Text>
+                </Tabs.Panel>
+
+                <Tabs.Panel value="typography" pt="md">
+                  <Text size="sm" color="dimmed">
+                    Typography settings and font selections will be shown here.
+                  </Text>
+                </Tabs.Panel>
+              </Tabs>
+
+              <Group position="right" mt="md">
+                <Button variant="light" onClick={() => setPreviewModalOpen(false)}>
+                  Close
+                </Button>
+                <Button
+                  leftIcon={<Download size={16} />}
+                  onClick={() => handleApplyDesign(selectedDesign)}
+                >
+                  Apply This Design
+                </Button>
+              </Group>
+            </Stack>
+          )}
+        </Modal>
+
+        {/* Customization Options */}
+        <Card padding="lg" radius="md" withBorder>
+          <Stack spacing="md">
+            <Title order={4}>Customization Options</Title>
+            <Text size="sm" color="dimmed">
+              Fine-tune the selected design to match your brand
+            </Text>
+            
+            <Group grow>
+              <Stack spacing="xs">
+                <Text size="sm" weight={500}>Brand Colors</Text>
+                <Switch label="Use existing brand colors" />
+              </Stack>
+              
+              <Stack spacing="xs">
+                <Text size="sm" weight={500}>Logo Integration</Text>
+                <Switch label="Integrate existing logo" defaultChecked />
+              </Stack>
+              
+              <Stack spacing="xs">
+                <Text size="sm" weight={500}>Content Migration</Text>
+                <Switch label="Preserve existing content" defaultChecked />
+              </Stack>
+              
+              <Stack spacing="xs">
+                <Text size="sm" weight={500}>SEO Settings</Text>
+                <Switch label="Maintain SEO structure" defaultChecked />
+              </Stack>
+            </Group>
+          </Stack>
+        </Card>
+
+        {/* Action Buttons */}
+        <Group position="center">
+          <Button variant="light" onClick={() => navigate(`/projects/${projectId}`)}>
+            Back to Project
+          </Button>
+          <Button>
+            Generate Custom Design
+          </Button>
+        </Group>
+      </Stack>
+    </Container>
+  );
+};
+
+export default DesignOptions;

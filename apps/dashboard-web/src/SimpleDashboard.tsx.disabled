@@ -1,0 +1,19 @@
+import { Container, Title, Text, Button, Group } from '@mantine/core';
+
+const SimpleDashboard = () => {
+  console.log('SimpleDashboard component is rendering!');
+  return (
+    <Container size="xl" p="md">
+      <Title order={1} mb="lg">Simple Dashboard</Title>
+      <Text size="lg" mb="md">
+        This is a very simple dashboard component to test rendering.
+      </Text>
+      <Group>
+        <Button>Dashboard Button 1</Button>
+        <Button variant="outline">Dashboard Button 2</Button>
+      </Group>
+    </Container>
+  );
+};
+
+export default SimpleDashboard;

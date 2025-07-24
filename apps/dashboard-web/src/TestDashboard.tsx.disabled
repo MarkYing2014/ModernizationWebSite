@@ -1,0 +1,19 @@
+import React from 'react';
+import { Container, Title, Text, Button, Group } from '@mantine/core';
+
+const TestDashboard = () => {
+  return (
+    <Container size="xl" p="md">
+      <Title order={1} mb="lg">Dashboard Test</Title>
+      <Text size="lg" mb="md">
+        This is a test dashboard to verify the layout is working.
+      </Text>
+      <Group>
+        <Button>Test Button 1</Button>
+        <Button variant="outline">Test Button 2</Button>
+      </Group>
+    </Container>
+  );
+};
+
+export default TestDashboard;

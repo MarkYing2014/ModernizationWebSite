@@ -1,0 +1,20 @@
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { AppShell, Text, Title } from '@mantine/core';
+
+const TestApp = () => {
+  return (
+    <AppShell padding="md">
+      <Title order={1}>Dashboard Test App</Title>
+      <Text>This is a simple test to see if routing works.</Text>
+      
+      <Routes>
+        <Route path="/" element={<div><Text>Home Route</Text></div>} />
+        <Route path="/test" element={<div><Text>Test Route</Text></div>} />
+        <Route path="*" element={<div><Text>404 - Not Found</Text></div>} />
+      </Routes>
+    </AppShell>
+  );
+};
+
+export default TestApp;

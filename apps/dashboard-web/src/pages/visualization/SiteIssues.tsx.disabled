@@ -1,0 +1,383 @@
+import React, { useState } from 'react';
+import {
+  Container,
+  Title,
+  Text,
+  Card,
+  Group,
+  Stack,
+  Badge,
+  ActionIcon,
+  Select,
+  TextInput,
+  Tabs,
+  Button,
+  Anchor,
+  Alert,
+  Progress,
+} from '@mantine/core';
+import {
+  ArrowLeft,
+  Search,
+  ExternalLink,
+  AlertTriangle,
+  Bug,
+  Accessible,
+  Speedboat,
+  Shield,
+} from 'tabler-icons-react';
+import { useNavigate, useParams } from 'react-router-dom';
+
+interface Issue {
+  id: string;
+  type: 'accessibility' | 'performance' | 'seo' | 'security';
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  title: string;
+  description: string;
+  url: string;
+  element?: string;
+  recommendation: string;
+}
+
+const mockIssues: Issue[] = [
+  {
+    id: '1',
+    type: 'accessibility',
+    severity: 'critical',
+    title: 'Missing alt text for images',
+    description: 'Images without alternative text make content inaccessible to screen readers.',
+    url: '/products/laptop-pro',
+    element: '<img src="laptop.jpg">',
+    recommendation: 'Add descriptive alt attributes to all images.',
+  },
+  {
+    id: '2',
+    type: 'performance',
+    severity: 'high',
+    title: 'Large unoptimized images',
+    description: 'Images are too large and slow down page loading.',
+    url: '/home',
+    element: 'hero-banner.jpg (2.5MB)',
+    recommendation: 'Compress images and use modern formats like WebP.',
+  },
+  {
+    id: '3',
+    type: 'seo',
+    severity: 'medium',
+    title: 'Missing meta descriptions',
+    description: 'Pages lack meta descriptions which hurt search engine visibility.',
+    url: '/about',
+    recommendation: 'Add unique, descriptive meta descriptions to all pages.',
+  },
+  {
+    id: '4',
+    type: 'security',
+    severity: 'high',
+    title: 'Mixed content warnings',
+    description: 'HTTPS pages loading HTTP resources create security vulnerabilities.',
+    url: '/checkout',
+    element: 'http://cdn.example.com/script.js',
+    recommendation: 'Update all resource URLs to use HTTPS.',
+  },
+  {
+    id: '5',
+    type: 'accessibility',
+    severity: 'medium',
+    title: 'Low color contrast',
+    description: 'Text color contrast ratio is below WCAG guidelines.',
+    url: '/contact',
+    element: '.text-secondary',
+    recommendation: 'Increase color contrast to meet WCAG AA standards.',
+  },
+];
+
+const SiteIssues: React.FC = () => {
+  const navigate = useNavigate();
+  const { projectId } = useParams();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [severityFilter, setSeverityFilter] = useState<string | null>(null);
+  const [typeFilter, setTypeFilter] = useState<string | null>(null);
+
+  const filteredIssues = mockIssues.filter(issue => {
+    const matchesSearch = issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         issue.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSeverity = !severityFilter || issue.severity === severityFilter;
+    const matchesType = !typeFilter || issue.type === typeFilter;
+    return matchesSearch && matchesSeverity && matchesType;
+  });
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'critical': return 'red';
+      case 'high': return 'orange';
+      case 'medium': return 'yellow';
+      case 'low': return 'blue';
+      default: return 'gray';
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'accessibility': return <Accessible size={16} />;
+      case 'performance': return <Speedboat size={16} />;
+      case 'seo': return <Search size={16} />;
+      case 'security': return <Shield size={16} />;
+      default: return <Bug size={16} />;
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'accessibility': return 'blue';
+      case 'performance': return 'green';
+      case 'seo': return 'purple';
+      case 'security': return 'red';
+      default: return 'gray';
+    }
+  };
+
+  const issueStats = {
+    total: mockIssues.length,
+    critical: mockIssues.filter(i => i.severity === 'critical').length,
+    high: mockIssues.filter(i => i.severity === 'high').length,
+    medium: mockIssues.filter(i => i.severity === 'medium').length,
+    low: mockIssues.filter(i => i.severity === 'low').length,
+  };
+
+  const typeStats = {
+    accessibility: mockIssues.filter(i => i.type === 'accessibility').length,
+    performance: mockIssues.filter(i => i.type === 'performance').length,
+    seo: mockIssues.filter(i => i.type === 'seo').length,
+    security: mockIssues.filter(i => i.type === 'security').length,
+  };
+
+  return (
+    <Container size="xl" py="xl">
+      <Stack spacing="xl">
+        {/* Header */}
+        <Group>
+          <ActionIcon
+            variant="subtle"
+            onClick={() => navigate(`/projects/${projectId}`)}
+          >
+            <ArrowLeft size={16} />
+          </ActionIcon>
+          <div style={{ flex: 1 }}>
+            <Title order={2}>Site Issues</Title>
+            <Text color="dimmed">Issues found during website analysis</Text>
+          </div>
+        </Group>
+
+        {/* Summary Cards */}
+        <Group grow>
+          <Card padding="md" radius="md" withBorder>
+            <Stack spacing="xs" align="center">
+              <Text size="xs" color="dimmed" transform="uppercase" weight={700}>
+                Total Issues
+              </Text>
+              <Text size="xl" weight={700}>
+                {issueStats.total}
+              </Text>
+            </Stack>
+          </Card>
+          
+          <Card padding="md" radius="md" withBorder>
+            <Stack spacing="xs" align="center">
+              <Text size="xs" color="dimmed" transform="uppercase" weight={700}>
+                Critical
+              </Text>
+              <Text size="xl" weight={700} color="red">
+                {issueStats.critical}
+              </Text>
+            </Stack>
+          </Card>
+          
+          <Card padding="md" radius="md" withBorder>
+            <Stack spacing="xs" align="center">
+              <Text size="xs" color="dimmed" transform="uppercase" weight={700}>
+                High Priority
+              </Text>
+              <Text size="xl" weight={700} color="orange">
+                {issueStats.high}
+              </Text>
+            </Stack>
+          </Card>
+          
+          <Card padding="md" radius="md" withBorder>
+            <Stack spacing="xs" align="center">
+              <Text size="xs" color="dimmed" transform="uppercase" weight={700}>
+                Medium/Low
+              </Text>
+              <Text size="xl" weight={700} color="blue">
+                {issueStats.medium + issueStats.low}
+              </Text>
+            </Stack>
+          </Card>
+        </Group>
+
+        {/* Issue Distribution */}
+        <Card padding="lg" radius="md" withBorder>
+          <Stack spacing="md">
+            <Title order={4}>Issues by Category</Title>
+            <Group grow>
+              <Stack spacing="xs">
+                <Group position="apart">
+                  <Group spacing="xs">
+                    <Accessible size={16} color="blue" />
+                    <Text size="sm">Accessibility</Text>
+                  </Group>
+                  <Text size="sm" weight={500}>{typeStats.accessibility}</Text>
+                </Group>
+                <Progress value={(typeStats.accessibility / issueStats.total) * 100} color="blue" />
+              </Stack>
+              
+              <Stack spacing="xs">
+                <Group position="apart">
+                  <Group spacing="xs">
+                    <Speedboat size={16} color="green" />
+                    <Text size="sm">Performance</Text>
+                  </Group>
+                  <Text size="sm" weight={500}>{typeStats.performance}</Text>
+                </Group>
+                <Progress value={(typeStats.performance / issueStats.total) * 100} color="green" />
+              </Stack>
+              
+              <Stack spacing="xs">
+                <Group position="apart">
+                  <Group spacing="xs">
+                    <Search size={16} color="purple" />
+                    <Text size="sm">SEO</Text>
+                  </Group>
+                  <Text size="sm" weight={500}>{typeStats.seo}</Text>
+                </Group>
+                <Progress value={(typeStats.seo / issueStats.total) * 100} color="purple" />
+              </Stack>
+              
+              <Stack spacing="xs">
+                <Group position="apart">
+                  <Group spacing="xs">
+                    <Shield size={16} color="red" />
+                    <Text size="sm">Security</Text>
+                  </Group>
+                  <Text size="sm" weight={500}>{typeStats.security}</Text>
+                </Group>
+                <Progress value={(typeStats.security / issueStats.total) * 100} color="red" />
+              </Stack>
+            </Group>
+          </Stack>
+        </Card>
+
+        {/* Filters */}
+        <Group>
+          <TextInput
+            placeholder="Search issues..."
+            icon={<Search size={16} />}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.currentTarget.value)}
+            style={{ flex: 1, maxWidth: 300 }}
+          />
+          <Select
+            placeholder="Filter by severity"
+            data={[
+              { value: 'critical', label: 'Critical' },
+              { value: 'high', label: 'High' },
+              { value: 'medium', label: 'Medium' },
+              { value: 'low', label: 'Low' },
+            ]}
+            value={severityFilter}
+            onChange={setSeverityFilter}
+            clearable
+          />
+          <Select
+            placeholder="Filter by type"
+            data={[
+              { value: 'accessibility', label: 'Accessibility' },
+              { value: 'performance', label: 'Performance' },
+              { value: 'seo', label: 'SEO' },
+              { value: 'security', label: 'Security' },
+            ]}
+            value={typeFilter}
+            onChange={setTypeFilter}
+            clearable
+          />
+        </Group>
+
+        {/* Issues List */}
+        <Stack spacing="md">
+          {filteredIssues.map((issue) => (
+            <Card key={issue.id} padding="lg" radius="md" withBorder>
+              <Stack spacing="md">
+                <Group position="apart">
+                  <Group spacing="sm">
+                    {getTypeIcon(issue.type)}
+                    <Title order={4}>{issue.title}</Title>
+                    <Badge color={getSeverityColor(issue.severity)} variant="light">
+                      {issue.severity.toUpperCase()}
+                    </Badge>
+                    <Badge color={getTypeColor(issue.type)} variant="outline">
+                      {issue.type}
+                    </Badge>
+                  </Group>
+                  <ActionIcon variant="subtle">
+                    <ExternalLink size={16} />
+                  </ActionIcon>
+                </Group>
+
+                <Text color="dimmed">{issue.description}</Text>
+
+                <Group spacing="md">
+                  <Text size="sm" color="dimmed">
+                    <strong>URL:</strong>{' '}
+                    <Anchor href={`https://example-store.com${issue.url}`} target="_blank">
+                      {issue.url}
+                    </Anchor>
+                  </Text>
+                  {issue.element && (
+                    <Text size="sm" color="dimmed">
+                      <strong>Element:</strong> <code>{issue.element}</code>
+                    </Text>
+                  )}
+                </Group>
+
+                <Alert
+                  icon={<AlertTriangle size={16} />}
+                  title="Recommendation"
+                  color="blue"
+                  variant="light"
+                >
+                  {issue.recommendation}
+                </Alert>
+              </Stack>
+            </Card>
+          ))}
+        </Stack>
+
+        {filteredIssues.length === 0 && (
+          <Card padding="xl">
+            <Stack align="center" spacing="md">
+              <Text size="lg" color="dimmed">No issues found</Text>
+              <Text size="sm" color="dimmed" align="center">
+                {searchTerm || severityFilter || typeFilter
+                  ? 'Try adjusting your search or filter criteria'
+                  : 'Great! No issues were detected in your website'
+                }
+              </Text>
+            </Stack>
+          </Card>
+        )}
+
+        {/* Action Buttons */}
+        <Group position="center">
+          <Button onClick={() => navigate(`/projects/${projectId}/crawl`)}>
+            Re-scan Website
+          </Button>
+          <Button variant="light" onClick={() => navigate(`/projects/${projectId}`)}>
+            Back to Project
+          </Button>
+        </Group>
+      </Stack>
+    </Container>
+  );
+};
+
+export default SiteIssues;

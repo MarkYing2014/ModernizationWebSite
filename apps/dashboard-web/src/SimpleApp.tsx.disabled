@@ -1,0 +1,35 @@
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { Container, Title, Text, Button, Group } from '@mantine/core';
+
+const SimpleApp = () => {
+  return (
+    <Container size="xl" p="md">
+      <Title order={1} mb="lg">Simple App Test</Title>
+      <Text size="lg" mb="md">
+        This is a very simple app to test if React Router and Mantine work.
+      </Text>
+      <Group>
+        <Button>Test Button 1</Button>
+        <Button variant="outline">Test Button 2</Button>
+      </Group>
+      
+      <Routes>
+        <Route path="/" element={
+          <div>
+            <Title order={2} mt="xl">Home Route</Title>
+            <Text>This is the home route content.</Text>
+          </div>
+        } />
+        <Route path="/test" element={
+          <div>
+            <Title order={2} mt="xl">Test Route</Title>
+            <Text>This is the test route content.</Text>
+          </div>
+        } />
+      </Routes>
+    </Container>
+  );
+};
+
+export default SimpleApp;

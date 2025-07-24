@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  Container,
   Grid,
   Paper,
   Title,
@@ -8,7 +7,6 @@ import {
   Group,
   Button,
   Badge,
-  Card,
   RingProgress,
   ThemeIcon,
   SimpleGrid,
@@ -20,24 +18,23 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import {
-  IconPlus,
-  IconRefresh,
-  IconChevronRight,
-  IconArrowUpRight,
-  IconArrowDownRight,
-  IconBrowserCheck,
-  IconDeviceAnalytics,
-  IconSeo,
-  IconAccessible,
-  IconPuzzle,
-  IconWorldUpload,
-  IconCloudUpload,
-  IconSettings,
-  IconChartBar,
-  IconAlertTriangle,
-  IconCheck,
-  IconClock,
-  IconLayoutGrid,
+  Plus,
+  Refresh,
+  ChevronRight,
+  ArrowUpRight,
+  ArrowDownRight,
+  BrowserCheck,
+  DeviceAnalytics,
+  Seo,
+  Accessible,
+  Puzzle,
+  WorldUpload,
+  CloudUpload,
+  ChartBar,
+  AlertTriangle,
+  Check,
+  Clock,
+  LayoutGrid,
 } from 'tabler-icons-react';
 import { Link } from 'react-router-dom';
 
@@ -140,10 +137,10 @@ const useStyles = createStyles((theme) => ({
 
 // Mock data for the dashboard
 const mockStats = [
-  { title: 'Active Projects', value: '5', change: 12.4, icon: IconBrowserCheck, color: 'blue' },
-  { title: 'Completed Projects', value: '12', change: 8.2, icon: IconCheck, color: 'green' },
-  { title: 'Issues Detected', value: '28', change: -5.1, icon: IconAlertTriangle, color: 'orange' },
-  { title: 'Modernization Score', value: '86%', change: 4.3, icon: IconChartBar, color: 'indigo' },
+  { title: 'Active Projects', value: '5', change: 12.4, icon: BrowserCheck, color: 'blue' },
+  { title: 'Completed Projects', value: '12', change: 8.2, icon: Check, color: 'green' },
+  { title: 'Issues Detected', value: '28', change: -5.1, icon: AlertTriangle, color: 'orange' },
+  { title: 'Modernization Score', value: '86%', change: 4.3, icon: ChartBar, color: 'indigo' },
 ];
 
 const mockRecentProjects = [
@@ -182,10 +179,10 @@ const mockRecentProjects = [
 ];
 
 const quickActions = [
-  { title: 'New Project', icon: IconPlus, color: 'blue', link: '/projects/new' },
-  { title: 'Site Analysis', icon: IconDeviceAnalytics, color: 'violet', link: '/projects/demo/visualization' },
-  { title: 'SEO Check', icon: IconSeo, color: 'green', link: '#' },
-  { title: 'Accessibility', icon: IconAccessible, color: 'orange', link: '#' },
+  { title: 'New Project', icon: Plus, color: 'blue', link: '/projects/new' },
+  { title: 'Site Analysis', icon: DeviceAnalytics, color: 'violet', link: '/projects/demo/visualization' },
+  { title: 'SEO Check', icon: Seo, color: 'green', link: '#' },
+  { title: 'Accessibility', icon: Accessible, color: 'orange', link: '#' },
 ];
 
 const issuesByCategory = [
@@ -216,21 +213,31 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <Container size="xl" px="xs">
-      <Group position="apart" mb="md">
+    <div style={{ padding: '24px', width: '100%', maxWidth: 'none' }}>
+      <Group position="apart" mb="xl">
         <div>
-          <Title order={2}>Dashboard</Title>
-          <Text color="dimmed" size="sm">
-            Welcome back! Here's an overview of your website modernization projects
+          <Title order={1} mb="xs">
+            Dashboard
+          </Title>
+          <Text color="dimmed" size="lg">
+            Welcome back! Here's an overview of your website modernization projects.
           </Text>
         </div>
-        <Button leftIcon={<IconRefresh size={16} />} variant="outline">
+        <Button leftIcon={<Refresh size={16} />} variant="light">
           Refresh Data
         </Button>
       </Group>
 
-      {/* Key Statistics */}
-      <SimpleGrid cols={4} breakpoints={[{ maxWidth: 'sm', cols: 1 }, { maxWidth: 'md', cols: 2 }]} mb="md">
+      {/* Statistics Cards */}
+      <SimpleGrid
+        cols={4}
+        spacing="xl"
+        breakpoints={[
+          { maxWidth: 'lg', cols: 2, spacing: 'lg' },
+          { maxWidth: 'sm', cols: 1, spacing: 'md' },
+        ]}
+        mb="xl"
+      >
         {mockStats.map((stat) => (
           <Paper key={stat.title} p="md" radius="md" className={classes.statCard}>
             <Group position="apart">
@@ -249,9 +256,9 @@ const Dashboard: React.FC = () => {
               <Text className={classes.statDescription}>Compared to last month</Text>
               <Group spacing={5}>
                 {stat.change > 0 ? (
-                  <IconArrowUpRight size={16} color={theme.colors.green[6]} />
+                  <ArrowUpRight size={16} color={theme.colors.green[6]} />
                 ) : (
-                  <IconArrowDownRight size={16} color={theme.colors.red[6]} />
+                  <ArrowDownRight size={16} color={theme.colors.red[6]} />
                 )}
                 <Text
                   size="sm"
@@ -266,7 +273,7 @@ const Dashboard: React.FC = () => {
         ))}
       </SimpleGrid>
 
-      <Grid gutter="md">
+      <Grid gutter="xl">
         {/* Recent Projects */}
         <Grid.Col span={8}>
           <Paper p="md" radius="md" className={classes.card} withBorder>
@@ -276,7 +283,7 @@ const Dashboard: React.FC = () => {
                 component={Link}
                 to="/projects"
                 variant="subtle"
-                rightIcon={<IconChevronRight size={16} />}
+                rightIcon={<ChevronRight size={16} />}
                 size="sm"
               >
                 View All
@@ -295,7 +302,7 @@ const Dashboard: React.FC = () => {
                   </Text>
                   <Group position="apart" mt="xs">
                     <Text size="xs" color="dimmed">
-                      <IconClock size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                      <Clock size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
                       Updated {project.lastUpdated}
                     </Text>
                     <Text size="xs" weight={500}>
@@ -317,7 +324,7 @@ const Dashboard: React.FC = () => {
                 </div>
                 <Tooltip label="View Project">
                   <ActionIcon component={Link} to={`/projects/${project.id}`} variant="light" size="lg">
-                    <IconChevronRight size={18} />
+                    <ChevronRight size={18} />
                   </ActionIcon>
                 </Tooltip>
               </Paper>
@@ -326,7 +333,7 @@ const Dashboard: React.FC = () => {
             <Button
               component={Link}
               to="/projects/new"
-              leftIcon={<IconPlus size={16} />}
+              leftIcon={<Plus size={16} />}
               fullWidth
               variant="light"
               mt="md"
@@ -378,7 +385,7 @@ const Dashboard: React.FC = () => {
               component={Link}
               to="/projects/demo/issues"
               variant="subtle"
-              rightIcon={<IconChevronRight size={16} />}
+              rightIcon={<ChevronRight size={16} />}
               fullWidth
               mt="sm"
             >
@@ -423,7 +430,7 @@ const Dashboard: React.FC = () => {
               ]}
               label={
                 <div style={{ textAlign: 'center' }}>
-                  <IconLayoutGrid size={20} color={theme.colors.blue[6]} />
+                  <LayoutGrid size={20} color={theme.colors.blue[6]} />
                 </div>
               }
             />
@@ -431,7 +438,7 @@ const Dashboard: React.FC = () => {
         </Grid.Col>
       </Grid>
 
-      <Grid gutter="md" mt="md">
+      <Grid gutter="xl" mt="xl">
         <Grid.Col span={12}>
           <Paper p="md" radius="md" className={classes.card} withBorder>
             <Group position="apart" mb="md">
@@ -451,7 +458,7 @@ const Dashboard: React.FC = () => {
                 </Group>
                 <Group position="apart" mb={5}>
                   <Text size="sm" color="dimmed">
-                    <IconCloudUpload size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                    <CloudUpload size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
                     5 deployments today
                   </Text>
                   <Badge size="sm" color="green">
@@ -471,7 +478,7 @@ const Dashboard: React.FC = () => {
                 </Group>
                 <Group position="apart" mb={5}>
                   <Text size="sm" color="dimmed">
-                    <IconWorldUpload size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                    <WorldUpload size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
                     2 deployments today
                   </Text>
                   <Badge size="sm" color="green">
@@ -491,7 +498,7 @@ const Dashboard: React.FC = () => {
                 </Group>
                 <Group position="apart" mb={5}>
                   <Text size="sm" color="dimmed">
-                    <IconPuzzle size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                    <Puzzle size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
                     All integrations connected
                   </Text>
                   <Badge size="sm" color="green">
@@ -503,7 +510,7 @@ const Dashboard: React.FC = () => {
           </Paper>
         </Grid.Col>
       </Grid>
-    </Container>
+    </div>
   );
 };
 

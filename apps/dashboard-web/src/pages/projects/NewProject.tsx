@@ -21,16 +21,16 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { 
-  IconAlertCircle, 
-  IconCheck, 
-  IconX, 
-  IconWorld, 
-  IconRobot, 
-  IconShieldCheck, 
-  IconLock,
-  IconAlertTriangle,
-  IconInfoCircle,
-  IconArrowRight,
+  AlertCircle, 
+  Check, 
+  X, 
+  World, 
+  Robot, 
+  ShieldCheck, 
+  Lock,
+  AlertTriangle,
+  InfoCircle,
+  ArrowRight,
 } from 'tabler-icons-react';
 
 interface UrlValidationFormValues {
@@ -60,28 +60,28 @@ const NewProject: React.FC = () => {
       id: 'format',
       title: 'URL Format',
       description: 'Validates the URL format and structure',
-      icon: <IconWorld size={18} />,
+      icon: <World size={18} />,
       status: 'pending',
     },
     {
       id: 'reachability',
       title: 'Reachability',
       description: 'Checks if the website is accessible',
-      icon: <IconCheck size={18} />,
+      icon: <Check size={18} />,
       status: 'pending',
     },
     {
       id: 'security',
       title: 'Security Check',
       description: 'Verifies SSL/TLS and security headers',
-      icon: <IconShieldCheck size={18} />,
+      icon: <ShieldCheck size={18} />,
       status: 'pending',
     },
     {
       id: 'robots',
       title: 'Robots.txt',
       description: 'Checks if crawling is allowed',
-      icon: <IconRobot size={18} />,
+      icon: <Robot size={18} />,
       status: 'pending',
     },
   ]);
@@ -250,7 +250,7 @@ const NewProject: React.FC = () => {
               required
               label="Website URL"
               placeholder="https://example.com"
-              icon={<IconWorld size={16} />}
+              icon={<World size={16} />}
               {...form.getInputProps('url')}
               disabled={loading || validationSuccess}
               description="Enter the root URL of the website you want to analyze and modernize"
@@ -258,7 +258,7 @@ const NewProject: React.FC = () => {
             />
 
             {error && (
-              <Alert icon={<IconAlertCircle size={16} />} title="Validation Error" color="red" variant="filled">
+              <Alert icon={<AlertCircle size={16} />} title="Validation Error" color="red" variant="filled">
                 {error}
               </Alert>
             )}
@@ -269,7 +269,7 @@ const NewProject: React.FC = () => {
                 fullWidth 
                 mt="md" 
                 loading={loading}
-                leftIcon={<IconCheck size={18} />}
+                leftIcon={<Check size={18} />}
                 size="lg"
               >
                 Validate URL
@@ -291,8 +291,8 @@ const NewProject: React.FC = () => {
                   loading={step.status === 'loading'}
                   completed={step.status === 'success'}
                   color={step.status === 'error' ? 'red' : 'blue'}
-                  icon={step.status === 'success' ? <IconCheck size={18} /> : 
-                         step.status === 'error' ? <IconX size={18} /> : 
+                  icon={step.status === 'success' ? <Check size={18} /> : 
+                         step.status === 'error' ? <X size={18} /> : 
                          step.icon}
                 >
                   <Box ml={10} mt={5}>
@@ -326,7 +326,7 @@ const NewProject: React.FC = () => {
             
             <List spacing="xs" size="sm" mt="md" center icon={
               <ThemeIcon color="teal" size={20} radius="xl">
-                <IconCheck size={12} />
+                <Check size={12} />
               </ThemeIcon>
             }>
               <List.Item>URL format is valid</List.Item>
@@ -339,7 +339,7 @@ const NewProject: React.FC = () => {
               <Button variant="outline" onClick={resetValidation}>
                 Try Another URL
               </Button>
-              <Button onClick={handleCreateProject} rightIcon={<IconArrowRight size={16} />}>
+              <Button onClick={handleCreateProject} rightIcon={<ArrowRight size={16} />}>
                 Create Project
               </Button>
             </Group>
@@ -364,7 +364,7 @@ const NewProject: React.FC = () => {
                 step.status === 'error' && (
                   <List.Item key={step.id} icon={
                     <ThemeIcon color="red" size={20} radius="xl">
-                      <IconX size={12} />
+                      <X size={12} />
                     </ThemeIcon>
                   }>
                     <Group spacing={5}>
@@ -387,7 +387,7 @@ const NewProject: React.FC = () => {
         <Box mt="xl">
           <Divider my="md" />
           <Group spacing="xs">
-            <IconInfoCircle size={16} color="gray" />
+            <InfoCircle size={16} color="gray" />
             <Text size="xs" color="dimmed">
               URL validation ensures the website can be properly crawled and analyzed. All data is processed securely.
             </Text>
@@ -404,7 +404,7 @@ const NewProject: React.FC = () => {
           <List.Item 
             icon={
               <ThemeIcon color="blue" size={24} radius="xl">
-                <IconWorld size={16} />
+                <World size={16} />
               </ThemeIcon>
             }
           >
@@ -417,7 +417,7 @@ const NewProject: React.FC = () => {
           <List.Item 
             icon={
               <ThemeIcon color="green" size={24} radius="xl">
-                <IconCheck size={16} />
+                <Check size={16} />
               </ThemeIcon>
             }
           >
@@ -430,7 +430,7 @@ const NewProject: React.FC = () => {
           <List.Item 
             icon={
               <ThemeIcon color="indigo" size={24} radius="xl">
-                <IconLock size={16} />
+                <Lock size={16} />
               </ThemeIcon>
             }
           >
@@ -443,7 +443,7 @@ const NewProject: React.FC = () => {
           <List.Item 
             icon={
               <ThemeIcon color="orange" size={24} radius="xl">
-                <IconRobot size={16} />
+                <Robot size={16} />
               </ThemeIcon>
             }
           >
@@ -454,7 +454,7 @@ const NewProject: React.FC = () => {
           </List.Item>
         </List>
         
-        <Alert icon={<IconAlertTriangle size={16} />} title="Need help?" color="yellow" variant="light" mt="xl">
+        <Alert icon={<AlertTriangle size={16} />} title="Need help?" color="yellow" variant="light" mt="xl">
           <Text size="sm">
             If you're having trouble with URL validation, make sure your website is publicly accessible and uses HTTPS.
             For testing, try using <Tooltip label="Will pass validation"><Text span color="blue">https://example.com</Text></Tooltip> or <Tooltip label="Will fail validation"><Text span color="red">http://no-https-example.com</Text></Tooltip>

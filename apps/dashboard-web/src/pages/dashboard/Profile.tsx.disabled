@@ -1,0 +1,307 @@
+import React, { useState } from 'react';
+import {
+  Container,
+  Title,
+  Text,
+  Card,
+  Group,
+  Stack,
+  Button,
+  TextInput,
+  Textarea,
+  Avatar,
+  Badge,
+  Grid,
+  Progress,
+  ActionIcon,
+  FileButton,
+} from '@mantine/core';
+import {
+  User,
+  Mail,
+  Building,
+  Calendar,
+  Edit,
+  Camera,
+  Trophy,
+  Target,
+} from 'tabler-icons-react';
+
+const Profile: React.FC = () => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [profile, setProfile] = useState({
+    name: 'Demo User',
+    email: 'demo@example.com',
+    company: 'Example Corp',
+    role: 'Web Developer',
+    bio: 'Passionate web developer focused on creating modern, accessible, and performant websites. Always looking for ways to improve user experience and code quality.',
+    joinDate: '2024-01-01',
+    avatar: null as File | null,
+  });
+
+  const stats = {
+    projectsCompleted: 12,
+    issuesResolved: 156,
+    totalCrawls: 45,
+    avgScore: 85,
+  };
+
+  const achievements = [
+    { id: 1, name: 'First Project', description: 'Completed your first website analysis', earned: true },
+    { id: 2, name: 'Issue Hunter', description: 'Resolved 100+ website issues', earned: true },
+    { id: 3, name: 'Speed Demon', description: 'Improved site speed by 50%+', earned: true },
+    { id: 4, name: 'Accessibility Champion', description: 'Fixed 50+ accessibility issues', earned: false },
+    { id: 5, name: 'SEO Master', description: 'Optimized 10+ sites for search engines', earned: false },
+    { id: 6, name: 'Design Guru', description: 'Applied 20+ modern designs', earned: false },
+  ];
+
+  const recentActivity = [
+    { id: 1, action: 'Completed crawl for E-commerce Website', date: '2 hours ago' },
+    { id: 2, action: 'Resolved 5 accessibility issues', date: '1 day ago' },
+    { id: 3, action: 'Applied Modern E-commerce design', date: '2 days ago' },
+    { id: 4, action: 'Created new project: Corporate Blog', date: '3 days ago' },
+    { id: 5, action: 'Fixed performance issues on Portfolio Site', date: '1 week ago' },
+  ];
+
+  const handleSave = () => {
+    setIsEditing(false);
+    // In a real app, this would save to the backend
+    console.log('Saving profile:', profile);
+  };
+
+  return (
+    <Container size="lg" py="xl">
+      <Stack spacing="xl">
+        {/* Header */}
+        <Group position="apart">
+          <div>
+            <Title order={2}>Profile</Title>
+            <Text color="dimmed">Manage your profile information and view your progress</Text>
+          </div>
+          <Button
+            leftIcon={<Edit size={16} />}
+            variant={isEditing ? 'filled' : 'light'}
+            onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+          >
+            {isEditing ? 'Save Changes' : 'Edit Profile'}
+          </Button>
+        </Group>
+
+        <Grid>
+          {/* Profile Information */}
+          <Grid.Col span={12} md={8}>
+            <Stack spacing="md">
+              {/* Basic Info Card */}
+              <Card padding="lg" radius="md" withBorder>
+                <Stack spacing="md">
+                  <Group>
+                    <div style={{ position: 'relative' }}>
+                      <Avatar size={80} radius="md" src={profile.avatar ? URL.createObjectURL(profile.avatar) : null}>
+                        <User size={40} />
+                      </Avatar>
+                      {isEditing && (
+                        <FileButton onChange={(file) => setProfile({ ...profile, avatar: file })} accept="image/*">
+                          {(props) => (
+                            <ActionIcon
+                              {...props}
+                              size="sm"
+                              radius="xl"
+                              variant="filled"
+                              style={{
+                                position: 'absolute',
+                                bottom: -5,
+                                right: -5,
+                              }}
+                            >
+                              <Camera size={12} />
+                            </ActionIcon>
+                          )}
+                        </FileButton>
+                      )}
+                    </div>
+                    
+                    <div style={{ flex: 1 }}>
+                      {isEditing ? (
+                        <Stack spacing="sm">
+                          <TextInput
+                            value={profile.name}
+                            onChange={(e) => setProfile({ ...profile, name: e.currentTarget.value })}
+                            placeholder="Full Name"
+                          />
+                          <Group grow>
+                            <TextInput
+                              value={profile.company}
+                              onChange={(e) => setProfile({ ...profile, company: e.currentTarget.value })}
+                              placeholder="Company"
+                            />
+                            <TextInput
+                              value={profile.role}
+                              onChange={(e) => setProfile({ ...profile, role: e.currentTarget.value })}
+                              placeholder="Role"
+                            />
+                          </Group>
+                        </Stack>
+                      ) : (
+                        <div>
+                          <Title order={3}>{profile.name}</Title>
+                          <Text color="dimmed">{profile.role} at {profile.company}</Text>
+                          <Group spacing="xs" mt="xs">
+                            <Mail size={14} />
+                            <Text size="sm" color="dimmed">{profile.email}</Text>
+                          </Group>
+                          <Group spacing="xs" mt={4}>
+                            <Calendar size={14} />
+                            <Text size="sm" color="dimmed">Joined {profile.joinDate}</Text>
+                          </Group>
+                        </div>
+                      )}
+                    </div>
+                  </Group>
+
+                  {/* Bio Section */}
+                  <div>
+                    <Text size="sm" weight={500} mb="xs">About</Text>
+                    {isEditing ? (
+                      <Textarea
+                        value={profile.bio}
+                        onChange={(e) => setProfile({ ...profile, bio: e.currentTarget.value })}
+                        placeholder="Tell us about yourself..."
+                        minRows={3}
+                      />
+                    ) : (
+                      <Text size="sm" color="dimmed">{profile.bio}</Text>
+                    )}
+                  </div>
+                </Stack>
+              </Card>
+
+              {/* Recent Activity */}
+              <Card padding="lg" radius="md" withBorder>
+                <Stack spacing="md">
+                  <Title order={4}>Recent Activity</Title>
+                  <Stack spacing="sm">
+                    {recentActivity.map((activity) => (
+                      <Group key={activity.id} position="apart">
+                        <Text size="sm">{activity.action}</Text>
+                        <Text size="xs" color="dimmed">{activity.date}</Text>
+                      </Group>
+                    ))}
+                  </Stack>
+                </Stack>
+              </Card>
+            </Stack>
+          </Grid.Col>
+
+          {/* Stats and Achievements */}
+          <Grid.Col span={12} md={4}>
+            <Stack spacing="md">
+              {/* Stats Card */}
+              <Card padding="lg" radius="md" withBorder>
+                <Stack spacing="md">
+                  <Title order={4}>Statistics</Title>
+                  
+                  <Stack spacing="sm">
+                    <Group position="apart">
+                      <Text size="sm" color="dimmed">Projects Completed</Text>
+                      <Text size="sm" weight={500}>{stats.projectsCompleted}</Text>
+                    </Group>
+                    
+                    <Group position="apart">
+                      <Text size="sm" color="dimmed">Issues Resolved</Text>
+                      <Text size="sm" weight={500}>{stats.issuesResolved}</Text>
+                    </Group>
+                    
+                    <Group position="apart">
+                      <Text size="sm" color="dimmed">Total Crawls</Text>
+                      <Text size="sm" weight={500}>{stats.totalCrawls}</Text>
+                    </Group>
+                    
+                    <div>
+                      <Group position="apart" mb="xs">
+                        <Text size="sm" color="dimmed">Average Score</Text>
+                        <Text size="sm" weight={500}>{stats.avgScore}%</Text>
+                      </Group>
+                      <Progress value={stats.avgScore} size="sm" />
+                    </div>
+                  </Stack>
+                </Stack>
+              </Card>
+
+              {/* Achievements Card */}
+              <Card padding="lg" radius="md" withBorder>
+                <Stack spacing="md">
+                  <Group position="apart">
+                    <Title order={4}>Achievements</Title>
+                    <Badge color="blue" variant="light">
+                      {achievements.filter(a => a.earned).length}/{achievements.length}
+                    </Badge>
+                  </Group>
+                  
+                  <Stack spacing="sm">
+                    {achievements.map((achievement) => (
+                      <Group key={achievement.id} spacing="sm">
+                        <ActionIcon
+                          size="sm"
+                          color={achievement.earned ? 'yellow' : 'gray'}
+                          variant={achievement.earned ? 'filled' : 'light'}
+                        >
+                          <Trophy size={14} />
+                        </ActionIcon>
+                        <div style={{ flex: 1 }}>
+                          <Text size="sm" weight={500} color={achievement.earned ? undefined : 'dimmed'}>
+                            {achievement.name}
+                          </Text>
+                          <Text size="xs" color="dimmed">
+                            {achievement.description}
+                          </Text>
+                        </div>
+                      </Group>
+                    ))}
+                  </Stack>
+                </Stack>
+              </Card>
+
+              {/* Goals Card */}
+              <Card padding="lg" radius="md" withBorder>
+                <Stack spacing="md">
+                  <Group>
+                    <Target size={20} />
+                    <Title order={4}>Current Goals</Title>
+                  </Group>
+                  
+                  <Stack spacing="sm">
+                    <div>
+                      <Group position="apart" mb="xs">
+                        <Text size="sm">Complete 15 Projects</Text>
+                        <Text size="xs" color="dimmed">12/15</Text>
+                      </Group>
+                      <Progress value={(12/15) * 100} size="sm" />
+                    </div>
+                    
+                    <div>
+                      <Group position="apart" mb="xs">
+                        <Text size="sm">Resolve 200 Issues</Text>
+                        <Text size="xs" color="dimmed">156/200</Text>
+                      </Group>
+                      <Progress value={(156/200) * 100} size="sm" />
+                    </div>
+                    
+                    <div>
+                      <Group position="apart" mb="xs">
+                        <Text size="sm">Achieve 90% Avg Score</Text>
+                        <Text size="xs" color="dimmed">85/90%</Text>
+                      </Group>
+                      <Progress value={(85/90) * 100} size="sm" />
+                    </div>
+                  </Stack>
+                </Stack>
+              </Card>
+            </Stack>
+          </Grid.Col>
+        </Grid>
+      </Stack>
+    </Container>
+  );
+};
+
+export default Profile;
