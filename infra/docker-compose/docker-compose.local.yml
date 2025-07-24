@@ -1,0 +1,173 @@
+version: '3.8'
+
+# ModernizationWebSite - Local Development Environment
+# This file sets up all required services for local development
+
+services:
+  # PostgreSQL - Main relational database
+  postgres:
+    image: postgres:15-alpine
+    container_name: modernization-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: svc
+      POSTGRES_PASSWORD: svc
+      POSTGRES_DB: modernize
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../../infra/sql/000_init.sql:/docker-entrypoint-initdb.d/000_init.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U svc -d modernize"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - modernize_net
+
+  # Redis - Cache and job queue
+  redis:
+    image: redis:7-alpine
+    container_name: modernization-redis
+    restart: unless-stopped
+    command: redis-server --requirepass redis123 --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis123", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - modernize_net
+
+  # MinIO - S3-compatible object storage
+  minio:
+    image: minio/minio:latest
+    container_name: modernization-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: localminio
+      MINIO_ROOT_PASSWORD: localminio123
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Console
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - modernize_net
+
+  # MinIO setup - Creates default bucket and policies
+  minio-setup:
+    image: minio/mc:latest
+    container_name: modernization-minio-setup
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      /usr/bin/mc config host add myminio http://minio:9000 localminio localminio123;
+      /usr/bin/mc mb --ignore-existing myminio/modernize-web;
+      /usr/bin/mc policy set public myminio/modernize-web;
+      exit 0;
+      "
+    networks:
+      - modernize_net
+
+  # Neo4j - Graph database for site structure analysis
+  neo4j:
+    image: neo4j:5
+    container_name: modernization-neo4j
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: neo4j/neo4j
+      NEO4J_dbms_memory_heap_initial__size: 512m
+      NEO4J_dbms_memory_heap_max__size: 1G
+      NEO4J_dbms_memory_pagecache_size: 512m
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # Bolt
+    healthcheck:
+      test: ["CMD", "wget", "http://localhost:7474", "-O", "/dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - modernize_net
+
+  # Mailhog - Email testing service
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: modernization-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - modernize_net
+
+# Optional GPU-enabled services (activated with --profile gpu)
+  # AI Design Service with GPU support
+  ai-design-svc:
+    image: modernization-web/ai-design-svc:latest
+    container_name: modernization-ai-design
+    restart: unless-stopped
+    build:
+      context: ../../apps/ai-design-svc
+      dockerfile: Dockerfile
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      REDIS_PASSWORD: redis123
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: localminio
+      MINIO_SECRET_KEY: localminio123
+      MODEL_PATH: /app/models
+      CUDA_VISIBLE_DEVICES: "0"
+    volumes:
+      - ai_models:/app/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    depends_on:
+      - redis
+      - minio
+    networks:
+      - modernize_net
+    profiles:
+      - gpu
+
+volumes:
+  postgres_data:
+    name: modernization-postgres-data
+  redis_data:
+    name: modernization-redis-data
+  minio_data:
+    name: modernization-minio-data
+  neo4j_data:
+    name: modernization-neo4j-data
+  neo4j_logs:
+    name: modernization-neo4j-logs
+  ai_models:
+    name: modernization-ai-models
+
+networks:
+  modernize_net:
+    name: modernization-network
+    driver: bridge
